@@ -1,0 +1,4 @@
+messages:
+  print-loc: '&6Your current location is: &f%s'
+  err-invalid-record: '&2%s is not a valid record name.'
+  err-invalid-music: '&2%s is not a valid music name.'

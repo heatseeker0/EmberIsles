@@ -1,0 +1,35 @@
+name: EmberIsles
+main: us.embercraft.emberisles.EmberIsles
+version: 1.0
+description: Skyblock core plugin
+author: heatseeker0
+depend: [WorldEdit, Vault]
+website: http://www.embercraft.us
+commands:
+  island:
+    usage: /<command>
+    description: Island Commands.
+    aliases: [is,skyblock,sb]
+    permission: emberisles.use
+  islandev:
+    usage: /<command>
+    description: Island management
+    permission: emberisles.admin
+  challenges:
+    usage: /<command>
+    description: Use and complete challenges using CUI!
+    aliases: [c]
+    permission: emberisles.challenges
+  protect:
+    usage: /<command> [everyone, helper, or member]
+    description: Opens the island protection interface. Use this to change how helpers and outsiders can affect your island.
+    aliases: [p]
+    permission: emberisles.use
+permissions:
+  emberisles.*:
+    description: All of the EmberIsles permissions
+    children:
+      emberisles.use: true
+      emberisles.admin: true
+      emberisles.challenges: true
+    default: op
