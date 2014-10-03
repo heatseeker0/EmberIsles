@@ -31,7 +31,7 @@ public class PlayerManager {
 	 * @param uuid
 	 * @return
 	 */
-	public String getName(final UUID uuid) {
+	public String getPlayerName(final UUID uuid) {
 		if (players.containsKey(uuid))
 			return players.get(uuid);
 		return "";

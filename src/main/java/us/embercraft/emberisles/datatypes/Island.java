@@ -1,11 +1,11 @@
 package us.embercraft.emberisles.datatypes;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Location;
@@ -97,7 +97,7 @@ public class Island implements Serializable {
     	return members.contains(player);
     }
     
-    public List<UUID> getMembers() {
+    public Set<UUID> getMembers() {
     	return members;
     }
     
@@ -124,6 +124,11 @@ public class Island implements Serializable {
 		return hashCode;
 	}
 	
+	@Override
+	public String toString() {
+		return String.format("[owner: %s, gridX: %s, gridZ: %s, schematic: %s]", EmberIsles.getInstance().getPlayerManager().getPlayerName(owner), islandGridX, islandGridZ);
+	}
+	
 	private transient int hashCode = 0;
 	
     private final int islandGridX;
@@ -134,7 +139,7 @@ public class Island implements Serializable {
     private long ownerLastLoginTime;
     private final Map<IslandProtectionAccessLevel, BitSet> protectionFlags = new HashMap<>();
     private UUID owner;
-    private final List<UUID> members = new ArrayList<>();
+    private final Set<UUID> members = new HashSet<>();
 
 	private static final long serialVersionUID = 1L;
 }

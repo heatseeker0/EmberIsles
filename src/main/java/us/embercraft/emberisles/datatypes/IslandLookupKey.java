@@ -21,6 +21,12 @@ public class IslandLookupKey {
 		hashCode = (31 + islandGridX) * 31  + islandGridZ;
 	}
 	
+	public IslandLookupKey(final Island island) {
+		this.islandGridX = island.getIslandGridX();
+		this.islandGridZ = island.getIslandGridZ();
+		hashCode = (31 + islandGridX) * 31  + islandGridZ;
+	}
+	
 	@Override
 	public boolean equals(Object o) {
 		if (o == null || !(o instanceof IslandLookupKey))
