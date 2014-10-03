@@ -9,10 +9,11 @@ import java.util.UUID;
 import us.embercraft.emberisles.datatypes.Island;
 import us.embercraft.emberisles.datatypes.IslandLookupKey;
 import us.embercraft.emberisles.datatypes.SyncType;
+import us.embercraft.emberisles.datatypes.WorldSettings;
 import us.embercraft.emberisles.datatypes.WorldType;
 
 public class WorldManager {
-	public WorldManager() {
+	private WorldManager() {
 		for (WorldType type : WorldType.values()) {
 			islands.put(type, new HashSet<Island>());
 			freeIslands.put(type, new HashSet<IslandLookupKey>());
@@ -20,6 +21,16 @@ public class WorldManager {
 		}
 		rebuildIslandLookupCache();
 		rebuildPlayerLookupCache();
+		
+		for (WorldType type : WorldType.values()) {
+			defaultWorldSettings.put(type, new WorldSettings());
+		}
+	}
+	
+	public static WorldManager getInstance() {
+		if (instance == null)
+			instance = new WorldManager();
+		return instance;
 	}
 	
 	/**
@@ -215,9 +226,40 @@ public class WorldManager {
 		}
 	}
 	
+	/**
+	 * Retrieves the island specified player is part of (either as owner or member). Returns null if player is not part of any island.
+	 * @param type World type
+	 * @param playerId Player unique ID
+	 * @return Island specified player is part of; null if player is not part of any island
+	 */
+	public Island getPlayerIsland(final WorldType type, final UUID playerId) {
+		return playerLookupCache.get(type).get(playerId);
+	}
+	
+	public void setDefaultWorldSettings(final WorldType type, final WorldSettings settings) {
+		defaultWorldSettings.put(type, settings);
+	}
+	
+	public WorldSettings getDefaultWorldSettings(final WorldType type) {
+		return defaultWorldSettings.get(type);
+	}
+	
+	/**
+	 * Returns true if the player island map for specified world has no entries, false otherwise.
+	 * @param type World type
+	 * @return True if the island map has no entries, false otherwise.
+	 */
+	public boolean isEmpty(WorldType type) {
+		return islands.get(type).isEmpty();
+	}
+	
+	private static WorldManager instance = null;
+	
 	transient private final Map<WorldType, Map<IslandLookupKey, Set<Island>>> islandLookupCache = new HashMap<>();
 	transient private final Map<WorldType, Map<UUID, Island>> playerLookupCache = new HashMap<>();
 	transient private final Map<WorldType, Boolean> dirtyFlag = new HashMap<>();
+	
+	private final Map<WorldType, WorldSettings> defaultWorldSettings = new HashMap<>();
 	
 	private final Map<WorldType, Set<Island>> islands = new HashMap<>();
 	private final Map<WorldType, Set<IslandLookupKey>> freeIslands = new HashMap<>();

@@ -1,5 +1,30 @@
 # Player data autosave time - in minutes, 0 to disable (NOT RECOMMENDED, WILL LOSE DATA ON SERVER CRASH!)
 player-auto-save: 17
+# World/Islands data autosave time - in minutes, 0 to disable (NOT RECOMMENDED, WILL LOSE DATA ON SERVER CRASH!)
+world-auto-save: 11
+
+world-settings:
+  normal:
+    # Sizes are in chunks
+    island-size: 12
+    border-size: 2
+    y: 128
+    starting-biome: PLAINS
+    allow-party: true
+  challenge:
+    # Sizes are in chunks
+    island-size: 12
+    border-size: 2
+    y: 128
+    starting-biome: TAIGA
+    allow-party: false
+  hardcore:
+    # Sizes are in chunks
+    island-size: 12
+    border-size: 2
+    y: 128
+    starting-biome: HELL
+    allow-party: false
 
 island-protection-defaults:
   members:

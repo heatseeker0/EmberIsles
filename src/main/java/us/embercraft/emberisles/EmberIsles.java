@@ -4,19 +4,24 @@ import java.io.File;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
 import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.Bukkit;
+import org.bukkit.block.Biome;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import us.embercraft.emberisles.datatypes.Island;
 import us.embercraft.emberisles.datatypes.IslandProtectionAccessLevel;
 import us.embercraft.emberisles.datatypes.IslandProtectionFlag;
+import us.embercraft.emberisles.datatypes.WorldSettings;
+import us.embercraft.emberisles.datatypes.WorldType;
 import us.embercraft.emberisles.util.MessageUtils;
 import us.embercraft.emberisles.util.SLAPI;
 
@@ -29,29 +34,52 @@ public class EmberIsles extends JavaPlugin {
 	    }
 	}
 	
+	public class AutoSaveWorlds implements Runnable {
+		@Override
+		public void run() {
+			for (WorldType type : WorldType.values()) {
+				if (getWorldManager().isDirty(type)) {
+					saveDatFilesWorld(type);
+					getWorldManager().clearDirty(type);
+					logInfoMessage(String.format("World files for world %s auto-saved.", type.getConfigKey()));
+				}
+			}
+		}
+	}
+	
 	@Override
 	public void onEnable() {
 		instance = this;
+		pluginManager = getServer().getPluginManager();
+
 		if (getServer().getServicesManager().getRegistration(Economy.class) != null) {
 			this.economy = getServer().getServicesManager().getRegistration(Economy.class).getProvider();
 		} else {
 			logErrorMessage("No economy plugin detected. Disabling plugin.");
-			Bukkit.getPluginManager().disablePlugin(this);
+			pluginManager.disablePlugin(this);
     		return;
 		}
 		
-		logInfoMessage("Loading data structures...");
+		logInfoMessage("Loading data structures:");
+		logInfoMessage("** Player data");
 		if (!loadDatFilesPlayer()) {
 			logErrorMessage("Plugin disabled.");
-			Bukkit.getPluginManager().disablePlugin(this);
+			pluginManager.disablePlugin(this);
     		return;
 		}
-		logInfoMessage("[done]");
+		logInfoMessage("** World data");
+		for (WorldType type : WorldType.values()) {
+			logInfoMessage(String.format("**** %s", type.getConfigKey()));
+			if (!loadDatFilesWorld(type)) {
+				logErrorMessage("Plugin disabled.");
+				pluginManager.disablePlugin(this);
+			}
+		}
+		logInfoMessage("[All loading done]");
 		
 		saveDefaultConfig();
 		applyConfig();
 		
-		pluginManager = getServer().getPluginManager();
 		pluginManager.registerEvents(new PlayerLoginListener(this), this);
 		pluginManager.registerEvents(new IslandProtectionListener(this), this);
 		
@@ -61,9 +89,15 @@ public class EmberIsles extends JavaPlugin {
 	
 	@Override
 	public void onDisable() {
-		logInfoMessage("Saving data structures...");
+		logInfoMessage("Saving data structures:");
+		logInfoMessage("** Player data");
 		saveDatFilesPlayer();
-		logInfoMessage("[done]");
+		logInfoMessage("** World data");
+		for (WorldType type : WorldType.values()) {
+			logInfoMessage(String.format("**** %s", type.getConfigKey()));
+			saveDatFilesWorld(type);
+		}
+		logInfoMessage("[All saving done]");
 	}
 	
 	public void applyConfig() {
@@ -83,11 +117,36 @@ public class EmberIsles extends JavaPlugin {
 			defaultProtectionFlags.put(accessLevel, bits);
 		}
 		
-		if (playersAutoSaveTaskId > 0)
+		for (WorldType type : WorldType.values()) {
+			WorldSettings settings = new WorldSettings();
+			settings.setIslandSize(config.getInt(String.format("world-settings.%s.island-size", type.getConfigKey()), settings.getIslandSize()));
+			settings.setBorderSize(config.getInt(String.format("world-settings.%s.border-size", type.getConfigKey()), settings.getBorderSize()));
+			settings.setY(config.getInt(String.format("world-settings.%s.y", type.getConfigKey()), settings.getY()));
+			try {
+				settings.setStartingBiome(Biome.valueOf(config.getString(String.format("world-settings.%s.starting-biome", type.getConfigKey()),
+						settings.getStartingBiome().toString()).toUpperCase()));
+			} catch (IllegalArgumentException e) {
+				logErrorMessage(String.format("Wrong biome type in config.yml for key world-settings.%s.starting-biome. Using PLAINS for this world type.", type.getConfigKey()));
+			}
+			settings.setAllowParty(config.getBoolean(String.format("world-settings.%s.allow-party", type.getConfigKey()), settings.getAllowParty()));
+			getWorldManager().setDefaultWorldSettings(type, settings);
+		}
+		
+		if (playersAutoSaveTaskId > 0) {
 			Bukkit.getScheduler().cancelTask(playersAutoSaveTaskId);
-        final int autoSave = getConfig().getInt("player-auto-save", 34);
+			playersAutoSaveTaskId = -1;
+		}
+        int autoSave = config.getInt("player-auto-save", 17);
         if (autoSave > 0)
-        	playersAutoSaveTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new AutoSavePlayers(), autoSave * 1200, autoSave * 1200);
+        	playersAutoSaveTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new AutoSavePlayers(), autoSave * TICKS_PER_MINUTE, autoSave * TICKS_PER_MINUTE);
+        
+        if (worldAutoSaveTaskId > 0) {
+        	Bukkit.getScheduler().cancelTask(worldAutoSaveTaskId);
+        	worldAutoSaveTaskId = -1;
+        }
+        autoSave = config.getInt("world-auto-save", 11);
+        if (autoSave > 0)
+        	worldAutoSaveTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new AutoSaveWorlds(), autoSave * TICKS_PER_MINUTE, autoSave * TICKS_PER_MINUTE);
 	}
 	
     /**
@@ -113,13 +172,46 @@ public class EmberIsles extends JavaPlugin {
                 getPlayerManager().addAll((Map<UUID, String>) SLAPI.load(dataFolder + "/" + PLAYERS_FILE));
             }
             catch(Exception e) {
-                logErrorMessage(String.format("Critical error while loading player data from disk. Error message: %s. Full stack trace:", e.getMessage()));
+                logErrorMessage(String.format("Critical error while loading PLAYER data from disk. Error message: %s", e.getMessage()));
                 e.printStackTrace();
                 return false;
             }
         }
         return true;
     }
+	
+	/**
+	 * Saves the island maps to disk.
+	 * @param type World type
+	 */
+	protected void saveDatFilesWorld(WorldType type) {
+		try {
+			SLAPI.save(getWorldManager().getAll(type), getDataFolder() + "/" + String.format(ISLANDS_FILE_TEMPLATE, type.getConfigKey()));
+		} catch(Exception e) {
+            e.printStackTrace();
+        }
+	}
+	
+	/**
+	 * Loads the island world data from disk.
+	 * @param type World type
+	 * @return Returns true if the maps were successfully loaded, false on error.
+	 */
+	protected boolean loadDatFilesWorld(WorldType type) {
+    	final File dataFolder = getDataFolder();
+    	
+        if (getWorldManager().isEmpty(type) && (new File(dataFolder, String.format(ISLANDS_FILE_TEMPLATE, type.getConfigKey()))).exists()) {
+            try {
+            	getWorldManager().addAll(type, (Set<Island>) SLAPI.load(dataFolder + "/" + String.format(ISLANDS_FILE_TEMPLATE, type.getConfigKey())));
+            }
+            catch(Exception e) {
+                logErrorMessage(String.format("Critical error while loading ISLAND data from disk for world %s. Error message: %s", type.getConfigKey(), e.getMessage()));
+                e.printStackTrace();
+                return false;
+            }
+        }
+        return true;
+	}
 	
 	public String getMessage(final String key) {
 		if (messages.containsKey(key)) {
@@ -146,6 +238,10 @@ public class EmberIsles extends JavaPlugin {
 		return playerManager;
 	}
 	
+	public WorldManager getWorldManager() {
+		return worldManager;
+	}
+	
 	public BitSet getDefaultProtectionFlags(final IslandProtectionAccessLevel accessLevel) {
 		return defaultProtectionFlags.get(accessLevel);
 	}
@@ -167,6 +263,7 @@ public class EmberIsles extends JavaPlugin {
 	public Economy economy;
     private static Logger logger = Logger.getLogger("Minecraft.EmberIsles");
     private PluginManager pluginManager;
+    final static int TICKS_PER_MINUTE = 60 * 20;
 	
 	/*
 	 * Config settings
@@ -181,4 +278,9 @@ public class EmberIsles extends JavaPlugin {
 	private int playersAutoSaveTaskId = -1;
 	public static final String PLAYERS_FILE = "players.dat";
 	private static PlayerManager playerManager = PlayerManager.getInstance();
+	
+	private int worldAutoSaveTaskId = -1;
+	public static final String ISLANDS_FILE_TEMPLATE = "islands_%s.dat";
+	public static final String FREE_ISLANDS_FILE_TEMPLATE = "freeIslands_%s.dat";
+	private static WorldManager worldManager = WorldManager.getInstance();
 }
