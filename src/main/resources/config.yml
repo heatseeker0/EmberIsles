@@ -1,4 +1,34 @@
+# Player data autosave time - in minutes, 0 to disable (NOT RECOMMENDED, WILL LOSE DATA ON SERVER CRASH!)
+player-auto-save: 17
+
+island-protection-defaults:
+  members:
+    friendly-mobs: true
+    hostile-mobs: true
+    interact-doors: true
+    interact-switches: true
+    open-containers: false
+    interact-anvils: true
+    ride: true
+    pick-ground-items: true
+  helpers:
+    friendly-mobs: false
+    hostile-mobs: true
+    interact-doors: true
+    interact-switches: true
+    open-containers: false
+    interact-anvils: true
+    ride: false
+    pick-ground-items: true
+  public:
+    friendly-mobs: false
+    hostile-mobs: false
+    interact-doors: false
+    interact-switches: false
+    open-containers: false
+    interact-anvils: false
+    ride: false
+    pick-ground-items: false
+
 messages:
   print-loc: '&6Your current location is: &f%s'
-  err-invalid-record: '&2%s is not a valid record name.'
-  err-invalid-music: '&2%s is not a valid music name.'
