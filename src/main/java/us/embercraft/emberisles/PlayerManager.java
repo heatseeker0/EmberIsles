@@ -18,12 +18,16 @@ public class PlayerManager {
 	
 	/**
 	 * Adds a new player to the players map. For existing entries, the player name is updated.
+	 * 
+	 * <p>Sets the <i>dirty flag</i>.</p>
+	 * 
 	 * @param uuid
 	 * @param string
 	 */
 	public void addPlayer(final UUID uuid, final String string) {
 		players.put(uuid, string);
 		playerIdLookup.put(string, uuid);
+		setDirty();
 	}
 	
 	/**
@@ -53,6 +57,8 @@ public class PlayerManager {
 	
 	/**
 	 * Loads provided players map, discarding any previous entries.
+	 * 
+	 * <p>Clears the <i>dirty flag</i>.</p>
 	 * @param players
 	 */
 	@SuppressWarnings("hiding")
@@ -60,14 +66,18 @@ public class PlayerManager {
 		this.players.clear();
 		this.players.putAll(players);
 		rebuildPlayerIdLookup();
+		clearDirty();
 	}
 	
 	/**
 	 * Removes all mappings from the players map. The map will be empty after this call returns.
+	 * 
+	 * <p>Sets the <i>dirty flag</i>.</p>
 	 */
 	public void clear() {
 		players.clear();
 		rebuildPlayerIdLookup();
+		setDirty();
 	}
 	
 	/**
@@ -89,6 +99,28 @@ public class PlayerManager {
 	}
 	
 	/**
+	 * Returns the <i>dirty flag</i> value.
+	 * @return The dirty flag value
+	 */
+	public Boolean isDirty() {
+		return dirtyFlag;
+	}
+	
+	/**
+	 * Sets the <i>dirty flag</i> on.
+	 */
+	public void setDirty() {
+		dirtyFlag = true;
+	}
+	
+	/**
+	 * Clears the <i>dirty flag</i>.
+	 */
+	public void clearDirty() {
+		dirtyFlag = false;
+	}
+	
+	/**
 	 * Returns true if the players map has no entries, false otherwise.
 	 * @return true if the players map has no entries
 	 */
@@ -97,7 +129,8 @@ public class PlayerManager {
 	}
 	
 	private static PlayerManager instance = null;
-	private transient Map<String, UUID> playerIdLookup = new HashMap<>();
+	transient private boolean dirtyFlag = false;
+	transient private Map<String, UUID> playerIdLookup = new HashMap<>();
 	
 	private final Map<UUID, String> players = new HashMap<>();
 }

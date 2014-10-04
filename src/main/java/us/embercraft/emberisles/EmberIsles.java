@@ -29,8 +29,11 @@ public class EmberIsles extends JavaPlugin {
 	public class AutoSavePlayers implements Runnable {
 	    @Override
 		public void run() {
-	        saveDatFilesPlayer();
-	        logInfoMessage("Player files auto-saved.");
+	    	if (getPlayerManager().isDirty()) {
+		        saveDatFilesPlayer();
+		        getPlayerManager().clearDirty();
+		        logInfoMessage("Player files auto-saved.");
+	    	}
 	    }
 	}
 	
