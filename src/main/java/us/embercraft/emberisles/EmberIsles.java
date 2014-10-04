@@ -8,8 +8,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import net.milkbowl.vault.economy.Economy;
-
 import org.bukkit.Bukkit;
 import org.bukkit.block.Biome;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -22,6 +20,8 @@ import us.embercraft.emberisles.datatypes.IslandProtectionAccessLevel;
 import us.embercraft.emberisles.datatypes.IslandProtectionFlag;
 import us.embercraft.emberisles.datatypes.WorldSettings;
 import us.embercraft.emberisles.datatypes.WorldType;
+import us.embercraft.emberisles.thirdparty.VaultAPI;
+import us.embercraft.emberisles.thirdparty.WorldEditAPI;
 import us.embercraft.emberisles.util.MessageUtils;
 import us.embercraft.emberisles.util.SLAPI;
 
@@ -55,12 +55,17 @@ public class EmberIsles extends JavaPlugin {
 		instance = this;
 		pluginManager = getServer().getPluginManager();
 
-		if (getServer().getServicesManager().getRegistration(Economy.class) != null) {
-			this.economy = getServer().getServicesManager().getRegistration(Economy.class).getProvider();
-		} else {
+		if (!VaultAPI.initAPI()) {
 			logErrorMessage("No economy plugin detected. Disabling plugin.");
 			pluginManager.disablePlugin(this);
     		return;
+		}
+		
+		// TODO: Set printStackTraces to false for production use.
+		if (!WorldEditAPI.initAPI(true)) {
+			logErrorMessage("WorldEdit couldn't be found or is disabled. Disabling plugin.");
+			pluginManager.disablePlugin(this);
+			return;
 		}
 		
 		logInfoMessage("Loading data structures:");
@@ -282,7 +287,6 @@ public class EmberIsles extends JavaPlugin {
 	 */
 	private static EmberIsles instance;
 	public static final String EOL = System.getProperty("line.separator");
-	public Economy economy;
     private static Logger logger = Logger.getLogger("Minecraft.EmberIsles");
     private PluginManager pluginManager;
     final static int TICKS_PER_MINUTE = 60 * 20;

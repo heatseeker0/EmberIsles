@@ -13,6 +13,7 @@ import us.embercraft.emberisles.datatypes.IslandLookupKey;
 import us.embercraft.emberisles.datatypes.SyncType;
 import us.embercraft.emberisles.datatypes.WorldSettings;
 import us.embercraft.emberisles.datatypes.WorldType;
+import us.embercraft.emberisles.thirdparty.WorldEditAPI;
 import us.embercraft.emberisles.util.WorldUtils;
 
 public class WorldManager {
@@ -33,7 +34,8 @@ public class WorldManager {
 	
 	/**
 	 * Generates the Bukkit world associated with the configured world type or loads it
-	 * from disk if it already exists.
+	 * from disk if it already exists. Also initializes WorldEditAPI internal structures
+	 * for the loaded / created world.
 	 * 
 	 * <p>This function intended use is to be called from plugin onEnable.</p>
 	 * 
@@ -41,9 +43,12 @@ public class WorldManager {
 	 * @return True on success, false if there was an error
 	 */
 	public boolean generateBukkitWorld(final WorldType type) {
-		if (bukkitWorld.get(type) != null)
+		if (bukkitWorld.get(type) == null)
 			bukkitWorld.put(type, WorldUtils.createWorld(getDefaultWorldSettings(type).getBukkitWorldName(), EmberIsles.getInstance().getWorldGenerator()));
-		return true;
+		if (bukkitWorld.get(type) != null && worldEditAPI.get(type) == null) {
+			worldEditAPI.put(type, new WorldEditAPI(bukkitWorld.get(type)));
+		}
+		return bukkitWorld.get(type) != null && worldEditAPI.get(type) != null;
 	}
 	
 	public static WorldManager getInstance() {
@@ -289,7 +294,9 @@ public class WorldManager {
 	transient private final Map<WorldType, Map<IslandLookupKey, Set<Island>>> islandLookupCache = new HashMap<>();
 	transient private final Map<WorldType, Map<UUID, Island>> playerLookupCache = new HashMap<>();
 	transient private final Map<WorldType, Boolean> dirtyFlag = new HashMap<>();
+	
 	transient private final Map<WorldType, World> bukkitWorld = new HashMap<>();
+	transient private final Map<WorldType, WorldEditAPI> worldEditAPI = new HashMap<>();
 	
 	private final Map<WorldType, WorldSettings> defaultWorldSettings = new HashMap<>();
 	
