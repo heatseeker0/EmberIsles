@@ -54,9 +54,18 @@ public class WorldSettings {
 		this.allowParty = allowParty;
 	}
 
+	public String getBukkitWorldName() {
+		return bukkitWorldName;
+	}
+
+	public void setBukkitWorldName(String bukkitWorldName) {
+		this.bukkitWorldName = bukkitWorldName;
+	}
+
 	private int islandSize;
 	private int borderSize;
 	private int y;
 	private Biome startingBiome;
 	private boolean allowParty;
+	private String bukkitWorldName;
 }

@@ -6,11 +6,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.bukkit.World;
+
 import us.embercraft.emberisles.datatypes.Island;
 import us.embercraft.emberisles.datatypes.IslandLookupKey;
 import us.embercraft.emberisles.datatypes.SyncType;
 import us.embercraft.emberisles.datatypes.WorldSettings;
 import us.embercraft.emberisles.datatypes.WorldType;
+import us.embercraft.emberisles.util.WorldUtils;
 
 public class WorldManager {
 	private WorldManager() {
@@ -24,7 +27,23 @@ public class WorldManager {
 		
 		for (WorldType type : WorldType.values()) {
 			defaultWorldSettings.put(type, new WorldSettings());
+			bukkitWorld.put(type, null);
 		}
+	}
+	
+	/**
+	 * Generates the Bukkit world associated with the configured world type or loads it
+	 * from disk if it already exists.
+	 * 
+	 * <p>This function intended use is to be called from plugin onEnable.</p>
+	 * 
+	 * @param type World type
+	 * @return True on success, false if there was an error
+	 */
+	public boolean generateBukkitWorld(final WorldType type) {
+		if (bukkitWorld.get(type) != null)
+			bukkitWorld.put(type, WorldUtils.createWorld(getDefaultWorldSettings(type).getBukkitWorldName(), EmberIsles.getInstance().getWorldGenerator()));
+		return true;
 	}
 	
 	public static WorldManager getInstance() {
@@ -37,6 +56,7 @@ public class WorldManager {
 	 * Discards any existing islands and loads the internal data structures with the provided set.
 	 * 
 	 * <p>Clears the <i>dirty flag</i> for the specified world.
+	 * 
 	 * @param type World type
 	 * @param islands New set of islands to load
 	 */
@@ -53,6 +73,7 @@ public class WorldManager {
 	 * Discards all islands from the specified world type. Doesn't clear in-game blocks. 
 	 * 
 	 * <p>Sets the <i>dirty flag<i> for the specified world.
+	 * 
 	 * @param type World type
 	 */
 	public void clear(final WorldType type) {
@@ -66,6 +87,7 @@ public class WorldManager {
 	
 	/**
 	 * Returns the <i>dirty flag</i> value for the specified world type.
+	 * 
 	 * @param type World type
 	 * @return The dirty flag value
 	 */
@@ -75,6 +97,7 @@ public class WorldManager {
 	
 	/**
 	 * Sets the <i>dirty flag</i> on for the specified world type.
+	 * 
 	 * @param type World type
 	 */
 	public void setDirty(final WorldType type) {
@@ -83,6 +106,7 @@ public class WorldManager {
 	
 	/**
 	 * Clears the <i>dirty flag</i> for the specified world type.
+	 * 
 	 * @param type World type
 	 */
 	public void clearDirty(final WorldType type) {
@@ -130,6 +154,7 @@ public class WorldManager {
 	 * Adds an island to the world manager for the specified world.
 	 * 
 	 * <p>Sets the <i>dirty flag</i> on for the specified world.</p>
+	 * 
 	 * @param type World type
 	 * @param island New island to add
 	 */
@@ -145,6 +170,7 @@ public class WorldManager {
 	 * to the free islands pool for future allocation.
 	 * 
 	 * <p>Sets the <i>dirty flag</i> on for the specified world.</p>
+	 * 
 	 * @param type World type
 	 * @param island Existing island to remove
 	 */
@@ -158,6 +184,7 @@ public class WorldManager {
 	
 	/**
 	 * Returns true if there's a player owned island at specified coordinates, false otherwise.
+	 * 
 	 * @param type World type
 	 * @param gridX grid X coordinate
 	 * @param gridZ grid Z coordinate
@@ -169,6 +196,7 @@ public class WorldManager {
 	
 	/**
 	 * Returns the player owned island at specified coordinates or null if there is none.
+	 * 
 	 * @param type World type
 	 * @param gridX grid X coordinate
 	 * @param gridZ grid Z coordinate
@@ -205,6 +233,7 @@ public class WorldManager {
 	
 	/**
 	 * Synchronizes all members / owner of an island with the lookup cache.
+	 * 
 	 * @param type World type
 	 * @param island Island to synchronize members from
 	 */
@@ -228,6 +257,7 @@ public class WorldManager {
 	
 	/**
 	 * Retrieves the island specified player is part of (either as owner or member). Returns null if player is not part of any island.
+	 * 
 	 * @param type World type
 	 * @param playerId Player unique ID
 	 * @return Island specified player is part of; null if player is not part of any island
@@ -246,6 +276,7 @@ public class WorldManager {
 	
 	/**
 	 * Returns true if the player island map for specified world has no entries, false otherwise.
+	 * 
 	 * @param type World type
 	 * @return True if the island map has no entries, false otherwise.
 	 */
@@ -258,6 +289,7 @@ public class WorldManager {
 	transient private final Map<WorldType, Map<IslandLookupKey, Set<Island>>> islandLookupCache = new HashMap<>();
 	transient private final Map<WorldType, Map<UUID, Island>> playerLookupCache = new HashMap<>();
 	transient private final Map<WorldType, Boolean> dirtyFlag = new HashMap<>();
+	transient private final Map<WorldType, World> bukkitWorld = new HashMap<>();
 	
 	private final Map<WorldType, WorldSettings> defaultWorldSettings = new HashMap<>();
 	

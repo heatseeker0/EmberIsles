@@ -76,12 +76,24 @@ public class EmberIsles extends JavaPlugin {
 			if (!loadDatFilesWorld(type)) {
 				logErrorMessage("Plugin disabled.");
 				pluginManager.disablePlugin(this);
+				return;
 			}
 		}
 		logInfoMessage("[All loading done]");
 		
 		saveDefaultConfig();
 		applyConfig();
+		
+		logInfoMessage("Loading Bukkit island worlds");
+		for (WorldType type : WorldType.values()) {
+			logInfoMessage(String.format("** %s", type.getConfigKey()));
+			if (!getWorldManager().generateBukkitWorld(type)) {
+				logErrorMessage(String.format("Fatal error while loading or generating world %s. Plugin disabled.", type.getConfigKey()));
+				pluginManager.disablePlugin(this);
+				return;
+			}
+		}
+		logInfoMessage("[All loading done]");
 		
 		pluginManager.registerEvents(new PlayerLoginListener(this), this);
 		pluginManager.registerEvents(new IslandProtectionListener(this), this);
@@ -112,6 +124,8 @@ public class EmberIsles extends JavaPlugin {
 			messages.put(msgKey, MessageUtils.parseColors(config.getString("messages." + msgKey)));
 		}
 		
+		worldGenerator = config.getString("world-generator", "CleanroomGenerator:.");
+		
 		for (IslandProtectionAccessLevel accessLevel : IslandProtectionAccessLevel.values()) {
 			BitSet bits = new BitSet();
 			for (IslandProtectionFlag flag : IslandProtectionFlag.values()) {
@@ -122,6 +136,7 @@ public class EmberIsles extends JavaPlugin {
 		
 		for (WorldType type : WorldType.values()) {
 			WorldSettings settings = new WorldSettings();
+			settings.setBukkitWorldName(config.getString(String.format("world-settings.%s.bukkit-name", type.getConfigKey())));
 			settings.setIslandSize(config.getInt(String.format("world-settings.%s.island-size", type.getConfigKey()), settings.getIslandSize()));
 			settings.setBorderSize(config.getInt(String.format("world-settings.%s.border-size", type.getConfigKey()), settings.getBorderSize()));
 			settings.setY(config.getInt(String.format("world-settings.%s.y", type.getConfigKey()), settings.getY()));
@@ -249,6 +264,10 @@ public class EmberIsles extends JavaPlugin {
 		return defaultProtectionFlags.get(accessLevel);
 	}
 	
+	public String getWorldGenerator() {
+		return worldGenerator;
+	}
+	
 	/**
 	 * Called automatically by the event handlers on player login.
 	 * @param player Player that logged in.
@@ -274,6 +293,7 @@ public class EmberIsles extends JavaPlugin {
 	public static FileConfiguration config;
 	private final Map<String, String> messages = new HashMap<>();
 	private final Map<IslandProtectionAccessLevel, BitSet> defaultProtectionFlags = new HashMap<>();
+	private String worldGenerator;
 	
 	/*
 	 * Data store
