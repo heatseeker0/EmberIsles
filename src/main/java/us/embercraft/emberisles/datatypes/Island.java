@@ -31,7 +31,7 @@ public class Island implements Serializable {
     }
     
     /**
-     * Sets the public island spawn (warp) to the specified non-null location.
+     * Sets the private island spawn to the specified non-null location.
      * @param loc
      */
     public void setSpawn(Location loc) {
@@ -40,8 +40,72 @@ public class Island implements Serializable {
     	}
     }
     
+    /**
+     * Gets the private island spawn, or null if one hasn't been set.
+     * 
+     * <p>In practice, island spawn is set in the island schematic by  placing a
+     * special block (e.g. bedrock or portal frame) so it'll seldom be null.</p>
+     * 
+     * @return The private island spawn, or null if one hasn't been set
+     */
     public ImmutableSimpleLocation getSpawn() {
     	return spawn;
+    }
+    
+    /**
+     * Sets the public island warp to the specified non-null location.
+     * @param loc
+     */
+    public void setWarp(Location loc) {
+    	if (loc != null) {
+    		warp = new ImmutableSimpleLocation(loc);
+    	}
+    }
+    
+    /**
+     * Gets the public island warp, or null if one hasn't been set.
+     * @return The public island warp, or null if one hasn't been set.
+     */
+    public ImmutableSimpleLocation getWarp() {
+    	return warp;
+    }
+    
+    public boolean isWarpEnabled() {
+    	return warp != null && warpEnabled;
+    }
+    
+    public void enableWarp() {
+    	if (warp != null) {
+    		warpEnabled = true;
+    	}
+    }
+    
+    public void disableWarp() {
+    	warpEnabled = false;
+    }
+    
+    /**
+     * Returns the status of the island lock. See {@link #lockIsland()} and {@link #unlockIsland()}.
+     * @return True if the island is locked
+     */
+    public boolean isIslandLocked() {
+    	return islandLocked;
+    }
+    
+    /**
+     * Lock the island preventing anyone except the island owner, members and
+     * helpers from entering the island space by any means.
+     */
+    public void lockIsland() {
+    	islandLocked = true;
+    }
+    
+    /**
+     * Unlocks the island allowing anyone (including non-members) to enter the
+     * island space.
+     */
+    public void unlockIsland() {
+    	islandLocked = false;
     }
     
     public long getCreateTime() {
@@ -109,6 +173,22 @@ public class Island implements Serializable {
     	return members.add(player);
     }
     
+    public boolean isBanned(UUID player) {
+    	return bannedPlayers.contains(player);
+    }
+    
+    public Set<UUID> getBannedPlayers() {
+    	return bannedPlayers;
+    }
+    
+    public boolean banPlayer(UUID player) {
+    	return bannedPlayers.remove(player);
+    }
+    
+    public boolean unbanPlayer(UUID player) {
+    	return bannedPlayers.add(player);
+    }
+    
 	@Override
 	public boolean equals(Object o) {
 		if (o == null || !(o instanceof Island))
@@ -134,12 +214,16 @@ public class Island implements Serializable {
     private final int islandGridX;
     private final int islandGridZ;
     private ImmutableSimpleLocation spawn;
+    private ImmutableSimpleLocation warp;
+    private boolean warpEnabled = false;
+    private boolean islandLocked = false;
     private final long createTime;
     private String schematic;
     private long ownerLastLoginTime;
     private final Map<IslandProtectionAccessLevel, BitSet> protectionFlags = new HashMap<>();
     private UUID owner;
     private final Set<UUID> members = new HashSet<>();
+    private final Set<UUID> bannedPlayers = new HashSet<>();
 
 	private static final long serialVersionUID = 1L;
 }
