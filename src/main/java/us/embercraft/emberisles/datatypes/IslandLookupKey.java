@@ -39,6 +39,14 @@ public class IslandLookupKey {
 	public int hashCode() {
 		return hashCode;
 	}
+	
+	public int getGridX() {
+		return islandGridX;
+	}
+	
+	public int getGridZ() {
+		return islandGridZ;
+	}
 
 	private final int islandGridX;
 	private final int islandGridZ;

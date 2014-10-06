@@ -13,6 +13,7 @@ public class WorldSettings {
 		y = 128;
 		startingBiome = Biome.PLAINS;
 		allowParty = true;
+		islandsPerRow = 100;
 	}
 	
 	public int getIslandSize() {
@@ -62,6 +63,15 @@ public class WorldSettings {
 		this.bukkitWorldName = bukkitWorldName;
 	}
 
+	public int getIslandsPerRow() {
+		return islandsPerRow;
+	}
+
+	public void setIslandsPerRow(int islandsPerRow) {
+		this.islandsPerRow = islandsPerRow;
+	}
+
+	private int islandsPerRow;
 	private int islandSize;
 	private int borderSize;
 	private int y;

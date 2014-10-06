@@ -21,6 +21,10 @@ public class Island implements Serializable {
 		initDefaultIslandData();
 	}
 	
+	public Island(final IslandLookupKey key) {
+		this(key.getGridX(), key.getGridZ());
+	}
+	
     /**
      * Initializes and sets common island data to default values.
      */

@@ -2,9 +2,9 @@ package us.embercraft.emberisles;
 
 import java.io.File;
 import java.util.BitSet;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -18,6 +18,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import us.embercraft.emberisles.datatypes.FutureMenuCommand;
 import us.embercraft.emberisles.datatypes.Island;
+import us.embercraft.emberisles.datatypes.IslandLookupKey;
 import us.embercraft.emberisles.datatypes.IslandProtectionAccessLevel;
 import us.embercraft.emberisles.datatypes.IslandProtectionFlag;
 import us.embercraft.emberisles.datatypes.SchematicDefinition;
@@ -162,6 +163,7 @@ public class EmberIsles extends JavaPlugin {
 				logErrorMessage(String.format("Wrong biome type in config.yml for key world-settings.%s.starting-biome. Using PLAINS for this world type.", type.getConfigKey()));
 			}
 			settings.setAllowParty(config.getBoolean(String.format("world-settings.%s.allow-party", type.getConfigKey()), settings.getAllowParty()));
+			settings.setIslandsPerRow(config.getInt(String.format("world-settings.%s.islands-per-row", type.getConfigKey()), settings.getIslandsPerRow()));
 			getWorldManager().setDefaultWorldSettings(type, settings);
 		}
 		
@@ -197,6 +199,8 @@ public class EmberIsles extends JavaPlugin {
 			}
 		}
 		
+		setupAutomaticAllocators();
+		
 		//TODO: Set up the gui screens
 		
 		if (playersAutoSaveTaskId > 0) {
@@ -214,6 +218,14 @@ public class EmberIsles extends JavaPlugin {
         autoSave = config.getInt("world-auto-save", 11);
         if (autoSave > 0)
         	worldAutoSaveTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new AutoSaveWorlds(), autoSave * TICKS_PER_MINUTE, autoSave * TICKS_PER_MINUTE);
+	}
+	
+	private void setupAutomaticAllocators() {
+		logInfoMessage("Setting up automatic island allocators...");
+		for (WorldType type : WorldType.values()) {
+			getWorldManager().initializeAllocator(type);
+		}
+		logInfoMessage("[Allocators set up]");
 	}
 	
     /**
@@ -253,10 +265,15 @@ public class EmberIsles extends JavaPlugin {
 	 */
 	protected void saveDatFilesWorld(WorldType type) {
 		try {
-			SLAPI.save(getWorldManager().getAll(type), getDataFolder() + "/" + String.format(ISLANDS_FILE_TEMPLATE, type.getConfigKey()));
+			SLAPI.save(getWorldManager().getAllOccupied(type), getDataFolder() + "/" + String.format(ISLANDS_FILE_TEMPLATE, type.getConfigKey()));
 		} catch(Exception e) {
             e.printStackTrace();
         }
+		try {
+			SLAPI.save(getWorldManager().getAllFree(type), getDataFolder() + "/" + String.format(FREE_ISLANDS_FILE_TEMPLATE, type.getConfigKey()));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -269,14 +286,26 @@ public class EmberIsles extends JavaPlugin {
     	
         if (getWorldManager().isEmpty(type) && (new File(dataFolder, String.format(ISLANDS_FILE_TEMPLATE, type.getConfigKey()))).exists()) {
             try {
-            	getWorldManager().addAll(type, (Set<Island>) SLAPI.load(dataFolder + "/" + String.format(ISLANDS_FILE_TEMPLATE, type.getConfigKey())));
+            	getWorldManager().addAllOccupied(type, (Collection<Island>) SLAPI.load(dataFolder + "/" + String.format(ISLANDS_FILE_TEMPLATE, type.getConfigKey())));
             }
             catch(Exception e) {
-                logErrorMessage(String.format("Critical error while loading ISLAND data from disk for world %s. Error message: %s", type.getConfigKey(), e.getMessage()));
+                logErrorMessage(String.format("Critical error while loading occupied ISLAND data from disk for world %s. Error message: %s", type.getConfigKey(), e.getMessage()));
                 e.printStackTrace();
                 return false;
             }
         }
+        
+        if (getWorldManager().isEmpty(type) && (new File(dataFolder, String.format(FREE_ISLANDS_FILE_TEMPLATE, type.getConfigKey()))).exists()) {
+            try {
+            	getWorldManager().addAllFree(type, (Collection<IslandLookupKey>) SLAPI.load(dataFolder + "/" + String.format(FREE_ISLANDS_FILE_TEMPLATE, type.getConfigKey())));
+            }
+            catch(Exception e) {
+                logErrorMessage(String.format("Critical error while loading free ISLAND data from disk for world %s. Error message: %s", type.getConfigKey(), e.getMessage()));
+                e.printStackTrace();
+                return false;
+            }
+        }
+        
         return true;
 	}
 	
@@ -339,11 +368,43 @@ public class EmberIsles extends JavaPlugin {
 	 */
 	public void onPlayerJoin(Player player) {
 		getPlayerManager().addPlayer(player.getUniqueId(), player.getName());
-		//TODO: Update island owner last login time if this player owns or is member of an island.
+		/*
+		 * Update last island activity for all worlds for this player.
+		 */
+		final long currentTime = System.currentTimeMillis();
+		for (WorldType type : WorldType.values()) {
+			Island island = getWorldManager().getPlayerIsland(type, player.getUniqueId());
+			if (island != null) {
+				island.setOwnerLoginTime(currentTime);
+				getWorldManager().setDirty(type);
+			}
+		}
 	}
 	
+	/**
+	 * Runs validity checks (i.e. player doesn't already own an island) and creates a new island for
+	 * given player.
+	 * 
+	 * @param player Player to set as owner for the island
+	 * @param cmd {@link FutureMenuCommand} island creation command
+	 */
 	public void createIsland(Player player, FutureMenuCommand cmd) {
+		if (getWorldManager().getPlayerIsland(cmd.getWorldType(), player.getUniqueId()) != null) {
+			player.sendMessage(getMessage("error-already-island"));
+			return;
+		}
+		IslandLookupKey key = getWorldManager().getNextFreeIslandLocation(cmd.getWorldType());
+		if (key == null) {
+			logErrorMessage(String.format("There are no more new islands available in world %s for new players.", cmd.getWorldType().getConfigKey()));
+			player.sendMessage(String.format(getMessage("error-no-free-islands"), cmd.getWorldType().getConfigKey()));
+			return;
+		}
+		Island island = new Island(key);
+		island.setOwner(player.getUniqueId());
+		island.setOwnerLoginTime(System.currentTimeMillis());
+		getWorldManager().addIsland(cmd.getWorldType(), island);
 		
+		// TODO: Paste the schematic, teleport player, etc.
 	}
 	
 	/*

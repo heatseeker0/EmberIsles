@@ -1,6 +1,9 @@
 package us.embercraft.emberisles;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,6 +19,8 @@ import us.embercraft.emberisles.datatypes.SchematicDefinition;
 import us.embercraft.emberisles.datatypes.SyncType;
 import us.embercraft.emberisles.datatypes.WorldSettings;
 import us.embercraft.emberisles.datatypes.WorldType;
+import us.embercraft.emberisles.islandallocators.AbstractIslandAllocator;
+import us.embercraft.emberisles.islandallocators.LinearSparseIslandAllocator;
 import us.embercraft.emberisles.thirdparty.WorldEditAPI;
 import us.embercraft.emberisles.util.WorldUtils;
 
@@ -23,7 +28,7 @@ public class WorldManager {
 	private WorldManager() {
 		for (WorldType type : WorldType.values()) {
 			islands.put(type, new HashSet<Island>());
-			freeIslands.put(type, new HashSet<IslandLookupKey>());
+			freeIslands.put(type, new ArrayDeque<IslandLookupKey>());
 			clearDirty(type);
 		}
 		rebuildIslandLookupCache();
@@ -33,7 +38,15 @@ public class WorldManager {
 			defaultWorldSettings.put(type, new WorldSettings());
 			schematicDefinitions.put(type, new ArrayList<SchematicDefinition>());
 			bukkitWorld.put(type, null);
+			islandAllocators.put(type, new LinearSparseIslandAllocator());
 		}
+	}
+	
+	public void initializeAllocator(final WorldType type) {
+		LinearSparseIslandAllocator allocator = (LinearSparseIslandAllocator) islandAllocators.get(type);
+		allocator.setLineLength(getDefaultWorldSettings(type).getIslandsPerRow());
+		allocator.updateCurrentGridOccupied(islands.get(type));
+		allocator.updateCurrentGridFree(freeIslands.get(type));
 	}
 	
 	/**
@@ -62,7 +75,7 @@ public class WorldManager {
 	}
 	
 	/**
-	 * Discards any existing islands and loads the internal data structures with the provided set.
+	 * Discards any existing occupied islands and loads the internal data structures with the provided set.
 	 * 
 	 * <p>Clears the <i>dirty flag</i> for the specified world.
 	 * 
@@ -70,12 +83,26 @@ public class WorldManager {
 	 * @param islands New set of islands to load
 	 */
 	@SuppressWarnings("hiding")
-	public void addAll(final WorldType type, final Set<Island> islands) {
+	public void addAllOccupied(final WorldType type, final Collection<Island> islands) {
 		this.islands.get(type).clear();
 		this.islands.get(type).addAll(islands);
 		clearDirty(type);
 		rebuildIslandLookupCache();
 		rebuildPlayerLookupCache();
+	}
+	
+	/**
+	 * Discards any existing free islands and loads the internal data structures with the provided set.
+	 * 
+	 * <p>Clears the <i>dirty flag</i> for the specified world.
+	 * 
+	 * @param type World type
+	 * @param freeIslandKeys New set of free islands to load
+	 */
+	public void addAllFree(final WorldType type, final Collection<IslandLookupKey> freeIslandKeys) {
+		this.freeIslands.get(type).clear();
+		this.freeIslands.get(type).addAll(freeIslandKeys);
+		clearDirty(type);
 	}
 	
 	/**
@@ -90,8 +117,12 @@ public class WorldManager {
 		setDirty(type);
 	}
 	
-	public Set<Island> getAll(final WorldType type) {
+	public Collection<Island> getAllOccupied(final WorldType type) {
 		return islands.get(type);
+	}
+	
+	public Collection<IslandLookupKey> getAllFree(final WorldType type) {
+		return freeIslands.get(type);
 	}
 	
 	/**
@@ -305,18 +336,34 @@ public class WorldManager {
 		return islands.get(type).isEmpty();
 	}
 	
+	/**
+	 * Returns the next free island location either from our free islands pool or if the pool 
+	 * is empty, as determined by the automatic island allocation algorithm.
+	 * 
+	 * @param type World type
+	 * @return Next free island location
+	 */
+	public IslandLookupKey getNextFreeIslandLocation(WorldType type) {
+		if (freeIslands.get(type).size() > 0) {
+			return freeIslands.get(type).pollFirst();
+		}
+		return islandAllocators.get(type).next();
+	}
+	
 	private static WorldManager instance = null;
 	
-	transient private final Map<WorldType, Map<IslandLookupKey, Set<Island>>> islandLookupCache = new HashMap<>();
-	transient private final Map<WorldType, Map<UUID, Island>> playerLookupCache = new HashMap<>();
-	transient private final Map<WorldType, Boolean> dirtyFlag = new HashMap<>();
+	private final Map<WorldType, Map<IslandLookupKey, Set<Island>>> islandLookupCache = new HashMap<>();
+	private final Map<WorldType, Map<UUID, Island>> playerLookupCache = new HashMap<>();
+	private final Map<WorldType, Boolean> dirtyFlag = new HashMap<>();
 	
-	transient private final Map<WorldType, World> bukkitWorld = new HashMap<>();
-	transient private final Map<WorldType, WorldEditAPI> worldEditAPI = new HashMap<>();
+	private final Map<WorldType, World> bukkitWorld = new HashMap<>();
+	private final Map<WorldType, WorldEditAPI> worldEditAPI = new HashMap<>();
 	
 	private final Map<WorldType, WorldSettings> defaultWorldSettings = new HashMap<>();
 	private final Map<WorldType, List<SchematicDefinition>> schematicDefinitions = new HashMap<>();
 	
+	private final Map<WorldType, AbstractIslandAllocator> islandAllocators = new HashMap<>();
+	
 	private final Map<WorldType, Set<Island>> islands = new HashMap<>();
-	private final Map<WorldType, Set<IslandLookupKey>> freeIslands = new HashMap<>();
+	private final Map<WorldType, Deque<IslandLookupKey>> freeIslands = new HashMap<>();
 }

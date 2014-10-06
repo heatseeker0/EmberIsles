@@ -17,6 +17,8 @@ world-settings:
     y: 128
     starting-biome: PLAINS
     allow-party: true
+    # Automatic allocator settings
+    islands-per-row: 100
   challenge:
     bukkit-name: "islands-challenge"
     # Sizes are in chunks
@@ -25,6 +27,7 @@ world-settings:
     y: 128
     starting-biome: TAIGA
     allow-party: false
+    islands-per-row: 100
   hardcore:
     bukkit-name: "islands-hardcore"
     # Sizes are in chunks
@@ -33,6 +36,7 @@ world-settings:
     y: 128
     starting-biome: HELL
     allow-party: false
+    islands-per-row: 100
 
 #
 # Schematic definitions. These are grouped by world type. The actual schematic node name (schematic1,
@@ -195,3 +199,5 @@ gui-screens:
     # items are populated at runtime based on definitions above in schematics section
 messages:
   print-loc: '&6Your current location is: &f%s'
+  error-already-island: "&cYou can't own or be member on more than one island of the same type."
+  error-no-free-islands: "&cCurrently there are no more free islands available in world %s. Inform an administrator about this."
