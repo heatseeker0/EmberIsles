@@ -1,7 +1,9 @@
 package us.embercraft.emberisles;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -10,6 +12,7 @@ import org.bukkit.World;
 
 import us.embercraft.emberisles.datatypes.Island;
 import us.embercraft.emberisles.datatypes.IslandLookupKey;
+import us.embercraft.emberisles.datatypes.SchematicDefinition;
 import us.embercraft.emberisles.datatypes.SyncType;
 import us.embercraft.emberisles.datatypes.WorldSettings;
 import us.embercraft.emberisles.datatypes.WorldType;
@@ -28,6 +31,7 @@ public class WorldManager {
 		
 		for (WorldType type : WorldType.values()) {
 			defaultWorldSettings.put(type, new WorldSettings());
+			schematicDefinitions.put(type, new ArrayList<SchematicDefinition>());
 			bukkitWorld.put(type, null);
 		}
 	}
@@ -279,6 +283,18 @@ public class WorldManager {
 		return defaultWorldSettings.get(type);
 	}
 	
+	public void addSchematicDefinition(final WorldType type, SchematicDefinition definition) {
+		schematicDefinitions.get(type).add(definition);
+	}
+	
+	public List<SchematicDefinition> getSchematicDefinitions(final WorldType type) {
+		return schematicDefinitions.get(type);
+	}
+	
+	public void clearSchematicDefinitions(final WorldType type) {
+		schematicDefinitions.get(type).clear();
+	}
+	
 	/**
 	 * Returns true if the player island map for specified world has no entries, false otherwise.
 	 * 
@@ -299,6 +315,7 @@ public class WorldManager {
 	transient private final Map<WorldType, WorldEditAPI> worldEditAPI = new HashMap<>();
 	
 	private final Map<WorldType, WorldSettings> defaultWorldSettings = new HashMap<>();
+	private final Map<WorldType, List<SchematicDefinition>> schematicDefinitions = new HashMap<>();
 	
 	private final Map<WorldType, Set<Island>> islands = new HashMap<>();
 	private final Map<WorldType, Set<IslandLookupKey>> freeIslands = new HashMap<>();

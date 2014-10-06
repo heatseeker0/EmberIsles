@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -67,6 +69,28 @@ public class GuiManager {
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Schedules opening a menu on behalf of the player. The menu is identified by it's config key. If a
+	 * menu with this key hasn't been added in the Gui manager the scheduling fails with an error message
+	 * being logged and displayed to the player.
+	 * @param player Player to open the menu for
+	 * @param key Config key for the menu to open.
+	 */
+	public void openChainedMenu(final Player player, final String key) {
+		final AbstractGui chainedMenu = getGuiByKey(key);
+		if (chainedMenu == null) {
+			logErrorMessage(String.format("[SEVERE] GuiManager.openChainedMenu: The menu identified by config key %s cannot be found in this Gui manager. Check plugin gui screens configuration.", key));
+			player.sendMessage(ChatColor.RED + "Plugin internal error. If this error persists ask an administrator to check server logs for more information about gui screens configuration for " + key);
+			return;
+		}
+		Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
+			@Override
+			public void run() {
+				player.openInventory(chainedMenu.createGui(player));
+			}
+		}, 5L);
 	}
 	
 	/**

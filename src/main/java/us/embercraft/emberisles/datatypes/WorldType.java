@@ -13,5 +13,22 @@ public enum WorldType {
 		return configKey;
 	}
 	
+	/**
+	 * Returns the enum associated with the given config key
+	 * @param configKey
+	 * @return
+	 */
+	public static WorldType getEnum(String configKey) {
+		if (configKey == null)
+			throw new IllegalArgumentException("configKey cannot be null");
+		configKey = configKey.toLowerCase();
+		for (WorldType type : WorldType.values()) {
+			if (type.getConfigKey().equals(configKey)) {
+				return type;
+			}
+		}
+		return NORMAL_WORLD;
+	}
+	
 	private final String configKey;
 }

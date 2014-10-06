@@ -15,9 +15,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import us.embercraft.emberisles.datatypes.FutureMenuCommand;
 import us.embercraft.emberisles.datatypes.Island;
 import us.embercraft.emberisles.datatypes.IslandProtectionAccessLevel;
 import us.embercraft.emberisles.datatypes.IslandProtectionFlag;
+import us.embercraft.emberisles.datatypes.SchematicDefinition;
 import us.embercraft.emberisles.datatypes.WorldSettings;
 import us.embercraft.emberisles.datatypes.WorldType;
 import us.embercraft.emberisles.thirdparty.VaultAPI;
@@ -162,6 +164,31 @@ public class EmberIsles extends JavaPlugin {
 			getWorldManager().setDefaultWorldSettings(type, settings);
 		}
 		
+		final File dataFolder = getDataFolder();
+		
+		for (WorldType type : WorldType.values()) {
+			getWorldManager().clearSchematicDefinitions(type);
+			for (String schemKey : config.getConfigurationSection(String.format("schematics.%s", type.getConfigKey())).getKeys(false)) {
+				if (!config.contains(String.format("schematics.%s.%s.permission", type.getConfigKey(), schemKey)) ||
+						!config.contains(config.getString(String.format("schematics.%s.%s.file", type.getConfigKey(), schemKey)))) {
+					logErrorMessage(String.format("One or more mandatory settings for schematic definition schematics.%s.%s is missing. This schematic will be ignored until this error is fixed.", type.getConfigKey(), schemKey));
+					continue;
+				}
+				File schemFile = new File(dataFolder, config.getString(String.format("schematics.%s.%s.file", type.getConfigKey(), schemKey)));
+				if (!schemFile.exists()) {
+					logErrorMessage(String.format("The specified file for schematic schematics.%s.%s is missing. This schematic will be ignored until this error is fixed.", type.getConfigKey(), schemKey));
+					continue;
+				}
+				SchematicDefinition definition = new SchematicDefinition(type,
+						MessageUtils.parseColors(config.getString(String.format("schematics.%s.%s.title", type.getConfigKey(), schemKey), "Undefined")),
+						config.getString(String.format("schematics.%s.%s.permission", type.getConfigKey(), schemKey)),
+						schemFile,
+						MessageUtils.parseColors(config.getStringList(String.format("schematics.%s.%s.lore", type.getConfigKey(), schemKey))),
+						MessageUtils.parseColors(config.getStringList(String.format("schematics.%s.%s.noperm-lore", type.getConfigKey(), schemKey))));
+				getWorldManager().addSchematicDefinition(type, definition);
+			}
+		}
+		
 		//TODO: Set up the gui screens
 		
 		if (playersAutoSaveTaskId > 0) {
@@ -286,6 +313,18 @@ public class EmberIsles extends JavaPlugin {
 		return worldGenerator;
 	}
 	
+	public void addFutureCommand(final UUID playerId, final FutureMenuCommand cmd) {
+		futureCommands.put(playerId, cmd);
+	}
+	
+	public FutureMenuCommand getFutureCommand(final UUID playerId) {
+		return futureCommands.get(playerId);
+	}
+	
+	public void deleteFutureCommand(final UUID playerId) {
+		futureCommands.remove(playerId);
+	}
+	
 	/**
 	 * Called automatically by the event handlers on player login.
 	 * @param player Player that logged in.
@@ -303,6 +342,7 @@ public class EmberIsles extends JavaPlugin {
     private static Logger logger = Logger.getLogger("Minecraft.EmberIsles");
     private PluginManager pluginManager;
     final static int TICKS_PER_MINUTE = 60 * 20;
+    private Map<UUID, FutureMenuCommand> futureCommands = new HashMap<>();
 	
 	/*
 	 * Config settings

@@ -6,6 +6,8 @@ world-auto-save: 11
 # Caution should be exercised when modifying the world generator options
 world-generator: "CleanroomGenerator:."
 
+# Definitions for worlds managed by this plugin. For Gui worlds seen by players see the gui-screens
+# section below.
 world-settings:
   normal:
     bukkit-name: "islands-normal"
@@ -39,7 +41,7 @@ world-settings:
 # Name and lores support Bukkit color codes.
 #
 # name - The name that is shown in the GUI
-# lore - The lore that's displayed in the GUI to players that have the permission to use it
+# title - The lore that's displayed in the GUI to players that have the permission to use it
 # noperm-lore - The lore that's displayed in the GUI to players that do NOT have the permission to use it
 # file - The file name where this schematic is stored in schematics/ folder
 # permission - Permission node players must have to be able to use this schematic
@@ -48,7 +50,7 @@ schematics:
   normal:
     schematic1:
       file: "starter.schematic"
-      name: "&aClassic"
+      title: "&aClassic"
       permission: "emberisles.schematic.normal.default"
       lore:
       - "&aThis is the classic skyblock"
@@ -60,18 +62,42 @@ schematics:
       - "&9http://www.embercraft.us"
     schematic2:
       file: "donator1.schematic"
-      name: "Big island"
+      title: "&6Big island"
       permission: "emberisles.schematic.normal.donator1"
+      lore:
+      - "&6Donator only skyblock"
+      - "&aBigger island, more"
+      - "&aresources than classic."
+      noperm-lore:
+      - "&cBuy access to this schematic"
+      - "&cin our shop at:"
+      - "&9http://shop.embercraft.us"
   challenge:
     schematic1:
       file: "starter.schematic"
-      name: "Classic"
+      title: "&aClassic"
       permission: "emberisles.schematic.challenge.default"
+      lore:
+      - "&aThis is the classic skyblock"
+      - "&awith a tree and some basic"
+      - "&aitems in a chest."
+      noperm-lore:
+      - "&cTo get access to this schematic"
+      - "&cvisit our website at:"
+      - "&9http://www.embercraft.us"
   hardcore:
     schematic1:
       file: "starter.schematic"
-      name: "Classic"
+      title: "&aClassic"
       permission: "emberisles.schematic.hardcore.default"
+      lore:
+      - "&aThis is the classic skyblock"
+      - "&awith a tree and some basic"
+      - "&aitems in a chest."
+      noperm-lore:
+      - "&cTo get access to this schematic"
+      - "&cvisit our website at:"
+      - "&9http://www.embercraft.us"
 
 island-protection-defaults:
   members:
@@ -102,5 +128,68 @@ island-protection-defaults:
     ride: false
     pick-ground-items: false
 
+#
+# Various virtual chest based Gui screens
+#
+# Most settings can be customized except gui config keys (e.g. world-selector).
+# items: keys for items represent the slot number in the gui. First slot is 0.
+#
+# All settings in this section that can be customized apply instantly at runtime
+# on /islandev reload
+#
+gui-screens:
+  world-selector:
+    inventory-rows: 1
+    title: "&1Select your &6world type"
+    items:
+      '3':
+        icon: STAINED_CLAY
+        durability: 13            # green
+        title: '&2Normal World'
+        lore:
+        - '&aIsland size: &696 x 96 blocks'
+        - '&aDefault biome: &6PLAINS'
+        - '&aParty allowed: &6yes'
+        noperm-lore:
+        - "&cTo get access to this world type"
+        - "&cvisit our website at:"
+        - "&9http://www.embercraft.us"
+        permission: "emberisles.world.normal"
+        world-type: "normal"
+      '4':
+        icon: STAINED_CLAY
+        durability: 1            # orange
+        title: '&2Challenge World'
+        lore:
+        - '&aIsland size: &696 x 96 blocks'
+        - '&aDefault biome: &6TAIGA'
+        - '&aParty allowed: &6no'
+        - '&aSpecial rules: &6harder leveling'
+        noperm-lore:
+        - "&cTo get access to this world type"
+        - "&cvisit our website at:"
+        - "&9http://www.embercraft.us"
+        permission: "emberisles.world.challenge"
+        world-type: "challenge"
+      '5':
+        icon: STAINED_CLAY
+        durability: 14           # red
+        title: '&2Hardcore World'
+        lore:
+        - '&aIsland size: &696 x 96 blocks'
+        - '&aDefault biome: &6HELL'
+        - '&aParty allowed: &6no'
+        - '&aSpecial rules: &6island lost on death'
+        noperm-lore:
+        - "&cTo get access to this world type"
+        - "&cvisit our website at:"
+        - "&9http://www.embercraft.us"
+        permission: "emberisles.world.hardcore"
+        world-type: "hardcore"
+  schematic-selector:
+    # increase inventory-rows if you have more than 9 schematics for a world type
+    inventory-rows: 1
+    title: "&1Select &6island schematic"
+    # items are populated at runtime based on definitions above in schematics section
 messages:
   print-loc: '&6Your current location is: &f%s'
