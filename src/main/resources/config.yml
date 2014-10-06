@@ -32,6 +32,47 @@ world-settings:
     starting-biome: HELL
     allow-party: false
 
+#
+# Schematic definitions. These are grouped by world type. The actual schematic node name (schematic1,
+# schematic2, etc.) doesn't matter as long as it's unique for a given world type.
+#
+# Name and lores support Bukkit color codes.
+#
+# name - The name that is shown in the GUI
+# lore - The lore that's displayed in the GUI to players that have the permission to use it
+# noperm-lore - The lore that's displayed in the GUI to players that do NOT have the permission to use it
+# file - The file name where this schematic is stored in schematics/ folder
+# permission - Permission node players must have to be able to use this schematic
+#
+schematics:
+  normal:
+    schematic1:
+      file: "starter.schematic"
+      name: "&aClassic"
+      permission: "emberisles.schematic.normal.default"
+      lore:
+      - "&aThis is the classic skyblock"
+      - "&awith a tree and some basic"
+      - "&aitems in a chest."
+      noperm-lore:
+      - "&cTo get access to this schematic"
+      - "&cvisit our website at:"
+      - "&9http://www.embercraft.us"
+    schematic2:
+      file: "donator1.schematic"
+      name: "Big island"
+      permission: "emberisles.schematic.normal.donator1"
+  challenge:
+    schematic1:
+      file: "starter.schematic"
+      name: "Classic"
+      permission: "emberisles.schematic.challenge.default"
+  hardcore:
+    schematic1:
+      file: "starter.schematic"
+      name: "Classic"
+      permission: "emberisles.schematic.hardcore.default"
+
 island-protection-defaults:
   members:
     friendly-mobs: true

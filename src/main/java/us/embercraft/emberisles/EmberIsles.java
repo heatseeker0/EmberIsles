@@ -24,6 +24,7 @@ import us.embercraft.emberisles.thirdparty.VaultAPI;
 import us.embercraft.emberisles.thirdparty.WorldEditAPI;
 import us.embercraft.emberisles.util.MessageUtils;
 import us.embercraft.emberisles.util.SLAPI;
+import us.embercraft.emberisles.util.guimanager.GuiManager;
 
 public class EmberIsles extends JavaPlugin {
 	public class AutoSavePlayers implements Runnable {
@@ -85,6 +86,12 @@ public class EmberIsles extends JavaPlugin {
 			}
 		}
 		logInfoMessage("[All loading done]");
+		
+		/*
+		 * The Gui manager initialization should be finalized before invoking applyConfig() in case any
+		 * Gui screens are generated there.
+		 */
+		getGuiManager().initManager(this);
 		
 		saveDefaultConfig();
 		applyConfig();
@@ -154,6 +161,8 @@ public class EmberIsles extends JavaPlugin {
 			settings.setAllowParty(config.getBoolean(String.format("world-settings.%s.allow-party", type.getConfigKey()), settings.getAllowParty()));
 			getWorldManager().setDefaultWorldSettings(type, settings);
 		}
+		
+		//TODO: Set up the gui screens
 		
 		if (playersAutoSaveTaskId > 0) {
 			Bukkit.getScheduler().cancelTask(playersAutoSaveTaskId);
@@ -265,6 +274,10 @@ public class EmberIsles extends JavaPlugin {
 		return worldManager;
 	}
 	
+	public GuiManager getGuiManager() {
+		return guiManager;
+	}
+	
 	public BitSet getDefaultProtectionFlags(final IslandProtectionAccessLevel accessLevel) {
 		return defaultProtectionFlags.get(accessLevel);
 	}
@@ -298,6 +311,7 @@ public class EmberIsles extends JavaPlugin {
 	private final Map<String, String> messages = new HashMap<>();
 	private final Map<IslandProtectionAccessLevel, BitSet> defaultProtectionFlags = new HashMap<>();
 	private String worldGenerator;
+	private static GuiManager guiManager = GuiManager.getInstance();
 	
 	/*
 	 * Data store
