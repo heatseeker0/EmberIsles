@@ -51,6 +51,8 @@ schematics:
     schematic1:
       file: "starter.schematic"
       title: "&aClassic"
+      icon: GRASS
+      durability: 0
       permission: "emberisles.schematic.normal.default"
       lore:
       - "&aThis is the classic skyblock"

@@ -24,7 +24,7 @@ public class WorldSelectorGui extends AbstractGui {
 	}
 
 	@Override
-	protected void preGuiPopulator() {
+	protected void preGuiPopulator(Player player) {
 		worldTypes.clear();
 	}
 

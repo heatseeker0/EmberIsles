@@ -4,9 +4,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Material;
+
 public class SchematicDefinition {
-	public SchematicDefinition(WorldType type, String menuTitle, String permission, File schematicFile, List<String> lore, List<String> noPermLore) {
+	public SchematicDefinition(WorldType type, Material material, short durability, String menuTitle, String permission, File schematicFile, List<String> lore, List<String> noPermLore) {
 		this.type = type;
+		this.material = material;
+		this.durability = durability;
 		this.menuTitle = menuTitle;
 		this.permission = permission;
 		this.schematicFile = schematicFile;
@@ -20,6 +24,14 @@ public class SchematicDefinition {
 	
 	public WorldType getType() {
 		return type;
+	}
+	
+	public Material getMaterial() {
+		return material;
+	}
+	
+	public short getDurability() {
+		return durability;
 	}
 	
 	public String getMenuTitle() {
@@ -44,6 +56,8 @@ public class SchematicDefinition {
 	
 	private final WorldType type;
 	private final String menuTitle;
+	private final Material material;
+	private final short durability;
 	private final List<String> lore = new ArrayList<>();
 	private final List<String> noPermLore = new ArrayList<>();
 	private final String permission;

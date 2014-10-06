@@ -28,7 +28,16 @@ public class FutureMenuCommand {
 		this.worldType = worldType;
 	}
 
+	public SchematicDefinition getSchematic() {
+		return schematic;
+	}
+
+	public void setSchematic(SchematicDefinition schematic) {
+		this.schematic = schematic;
+	}
+
 	private final UUID playerId;
 	private final CommandType type;
 	private WorldType worldType;
+	private SchematicDefinition schematic;
 }

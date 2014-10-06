@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.block.Biome;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -179,7 +180,14 @@ public class EmberIsles extends JavaPlugin {
 					logErrorMessage(String.format("The specified file for schematic schematics.%s.%s is missing. This schematic will be ignored until this error is fixed.", type.getConfigKey(), schemKey));
 					continue;
 				}
+				Material material = Material.getMaterial(config.getString(String.format("schematics.%s.%s.icon", type.getConfigKey(), schemKey)));
+				if (material == null) {
+					logErrorMessage(String.format("Invalid icon for schematic schematics.%s.%s. This schematic will be ignored until this error is fixed.", type.getConfigKey(), schemKey));
+					continue;
+				}
 				SchematicDefinition definition = new SchematicDefinition(type,
+						material,
+						(short) config.getInt(String.format("schematics.%s.%s.durability", type.getConfigKey(), schemKey)),
 						MessageUtils.parseColors(config.getString(String.format("schematics.%s.%s.title", type.getConfigKey(), schemKey), "Undefined")),
 						config.getString(String.format("schematics.%s.%s.permission", type.getConfigKey(), schemKey)),
 						schemFile,
@@ -332,6 +340,10 @@ public class EmberIsles extends JavaPlugin {
 	public void onPlayerJoin(Player player) {
 		getPlayerManager().addPlayer(player.getUniqueId(), player.getName());
 		//TODO: Update island owner last login time if this player owns or is member of an island.
+	}
+	
+	public void createIsland(Player player, FutureMenuCommand cmd) {
+		
 	}
 	
 	/*
