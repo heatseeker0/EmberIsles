@@ -218,3 +218,5 @@ messages:
   print-loc: '&6Your current location is: &f%s'
   error-already-island: "&cYou can't own or be member on more than one island of the same type."
   error-no-free-islands: "&cCurrently there are no more free islands available in world %s. Inform an administrator about this."
+  error-not-from-console: "&cYou can't run this command from console."
+  error-internal-misconfigured: "&cPlugin is misconfigured. Inform an administrator about this."
