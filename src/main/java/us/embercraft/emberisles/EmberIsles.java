@@ -274,6 +274,12 @@ public class EmberIsles extends JavaPlugin {
      * Saves the player -> uuid maps to disk.
      */
     protected void saveDatFilesPlayer() {
+    	/*
+    	 * Shouldn't happen in 99.9% cases, but let's play safe in case an admin deletes our data folder with server running.
+    	 */
+    	if (!getDataFolder().exists()) {
+    		getDataFolder().mkdirs();
+    	}
         try {
             SLAPI.save(getPlayerManager().getAll(), getDataFolder() + "/" + PLAYERS_FILE);
         } catch(Exception e) {
@@ -306,6 +312,12 @@ public class EmberIsles extends JavaPlugin {
 	 * @param type World type
 	 */
 	protected void saveDatFilesWorld(WorldType type) {
+    	/*
+    	 * Shouldn't happen in 99.9% cases, but let's play safe in case an admin deletes our data folder with server running.
+    	 */
+    	if (!getDataFolder().exists()) {
+    		getDataFolder().mkdirs();
+    	}
 		try {
 			SLAPI.save(getWorldManager().getAllOccupied(type), getDataFolder() + "/" + String.format(ISLANDS_FILE_TEMPLATE, type.getConfigKey()));
 		} catch(Exception e) {
