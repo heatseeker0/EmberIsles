@@ -70,6 +70,12 @@ public abstract class AbstractGui {
 		
 		preGuiPopulator(player);
 		ConfigurationSection items = config.getConfigurationSection("items");
+		
+		// Dynamic GUIs may have no items section.
+		if (items == null) {
+			return gui;
+		}
+		
 		for (String key : items.getKeys(false)) {
 			int slot = 0;
 			try {
