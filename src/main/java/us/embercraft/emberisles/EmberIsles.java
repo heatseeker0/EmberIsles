@@ -120,6 +120,7 @@ public class EmberIsles extends JavaPlugin {
 				pluginManager.disablePlugin(this);
 				return;
 			}
+			getWorldManager().getWorldEditAPI(type).setPasteAttrib(worldEditIgnoreAirBlocks, worldEditPasteEntities);
 		}
 		logInfoMessage("[All loading done]");
 		
@@ -188,10 +189,17 @@ public class EmberIsles extends JavaPlugin {
 		/*
 		 * Set up WorldEdit API paste settings
 		 */
-		boolean ignoreAirBlocks = config.getBoolean("worldedit-api.ignore-air-blocks", false);
-		boolean pasteEntities = config.getBoolean("worldedit-api.paste-entities", false);
+		worldEditIgnoreAirBlocks = config.getBoolean("worldedit-api.ignore-air-blocks", false);
+		worldEditPasteEntities = config.getBoolean("worldedit-api.paste-entities", false);
+		/*
+		 * During initial world setup apis will be null. We still need to setPasteAttrib here so it gets applied 
+		 * on /islandev reload, and we *also* set these up in onEnable() after the Bukkit worlds have been generated and loaded.
+		 */
 		for (WorldType type : WorldType.values()) {
-			getWorldManager().getWorldEditAPI(type).setPasteAttrib(ignoreAirBlocks, pasteEntities);
+			WorldEditAPI api = getWorldManager().getWorldEditAPI(type);
+			if (api != null) {
+				api.setPasteAttrib(worldEditIgnoreAirBlocks, worldEditPasteEntities);
+			}
 		}
 		
 		/*
@@ -524,6 +532,8 @@ public class EmberIsles extends JavaPlugin {
 	private final Map<String, String> messages = new HashMap<>();
 	private final Map<IslandProtectionAccessLevel, BitSet> defaultProtectionFlags = new HashMap<>();
 	private String worldGenerator;
+	private boolean worldEditIgnoreAirBlocks;
+	private boolean worldEditPasteEntities;
 	private static GuiManager guiManager = GuiManager.getInstance();
 	
 	/*
