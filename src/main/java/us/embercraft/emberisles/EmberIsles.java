@@ -534,7 +534,8 @@ public class EmberIsles extends JavaPlugin {
 		if (spawnLocation == null) {
 			//TODO: set the home to a reasonable middle position if material was not found
 			logInfoMessage("DEBUG: spawnLocation == null");
-			return;
+			//return;
+			spawnLocation = cornerA;
 		}
 		island.setSpawn(spawnLocation);
 		

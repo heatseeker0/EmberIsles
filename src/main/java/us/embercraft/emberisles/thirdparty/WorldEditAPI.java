@@ -9,6 +9,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 
+import us.embercraft.emberisles.EmberIsles;
+
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EmptyClipboardException;
 import com.sk89q.worldedit.FilenameException;
@@ -70,21 +72,23 @@ public class WorldEditAPI {
 			editSession.enableQueue();
 			localSession.setClipboard(SchematicFormat.MCEDIT.load(file));
 			Vector pasteLocation = localSession.getClipboard().getOrigin();
-			int width = localSession.getClipboard().getWidth() / 2;
-			int length = localSession.getClipboard().getLength() / 2;
+			Vector clipboardSize = localSession.getClipboard().getSize();
+			EmberIsles.getInstance().logInfoMessage(String.format("pasteLocation: %s; clipboardSize: %s", pasteLocation.toString(), clipboardSize.toString()));
+			int width = clipboardSize.getBlockX() / 2;
+			int length = clipboardSize.getBlockZ() / 2;
 			if (pasteLoc != null) {
-				pasteCornerA = pasteLoc;
-				pasteCornerB = pasteCornerA.add(localSession.getClipboard().getWidth(), localSession.getClipboard().getHeight(), localSession.getClipboard().getLength());
+				pasteCornerA = pasteLoc.clone();
+				pasteCornerB = pasteLoc.clone().add(clipboardSize.getBlockX(), clipboardSize.getBlockY(), clipboardSize.getBlockZ());
 				pasteLocation = new Vector(pasteLoc.getBlockX(), pasteLoc.getBlockY(), pasteLoc.getBlockZ());
 				if (centered) {
 					pasteLocation = pasteLocation.subtract(width, 0, length);
-					pasteCornerA = pasteCornerA.subtract(width, 0, length);
-					pasteCornerB = pasteCornerB.subtract(width, 0, length);
+					pasteCornerA.subtract(width, 0, length);
+					pasteCornerB.subtract(width, 0, length);
 				}
 			} else {
 				//TODO: Verify this works correctly
 				pasteCornerA = new Location(((BukkitWorld) editSession.getWorld()).getWorld(), pasteLocation.getBlockX(), pasteLocation.getBlockY(), pasteLocation.getBlockZ());
-				pasteCornerB = pasteCornerA.add(localSession.getClipboard().getWidth(), localSession.getClipboard().getHeight(), localSession.getClipboard().getLength());
+				pasteCornerB = pasteCornerA.clone().add(clipboardSize.getBlockX(), clipboardSize.getBlockY(), clipboardSize.getBlockZ());
 			}
 			/*
 			 * Don't paste air blocks (increases speed, reduces block count) and paste entities in case we have any saved in the schematic.
