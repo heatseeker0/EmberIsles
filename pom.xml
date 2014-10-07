@@ -64,8 +64,16 @@
 				<directory>${basedir}/src/main/resources</directory>
 				<filtering>true</filtering>
 				<includes>
-					<include>*.*</include>
+					<include>*.yml</include>
 				</includes>
+			</resource>
+			<resource>
+				<targetPath>.</targetPath>
+				<directory>${basedir}/src/main/resources</directory>
+				<filtering>false</filtering>
+				<excludes>
+					<exclude>*.yml</exclude>
+				</excludes>
 			</resource>
 		</resources>
 	</build>
