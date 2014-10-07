@@ -73,8 +73,14 @@ public class EmberIsles extends JavaPlugin {
 		}
 		
 		// TODO: Set printStackTraces to false for production use.
-		if (!WorldEditAPI.initAPI(true)) {
-			logErrorMessage("WorldEdit couldn't be found or is disabled. Disabling plugin.");
+		try {
+			if (!WorldEditAPI.initAPI(true)) {
+				logErrorMessage("WorldEdit couldn't be found or is disabled. Disabling plugin.");
+				pluginManager.disablePlugin(this);
+				return;
+			}
+		} catch (NoClassDefFoundError e) {
+			logErrorMessage("Your WorldEdit is incompatible. Use WorldEdit 5.6.x. Disabling plugin.");
 			pluginManager.disablePlugin(this);
 			return;
 		}
