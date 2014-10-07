@@ -6,6 +6,7 @@ import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import us.embercraft.emberisles.EmberIsles;
@@ -21,7 +22,7 @@ public class SchematicSelectorGui extends AbstractGui {
 	}
 
 	@Override
-	protected void preGuiPopulator(Player player) {
+	protected void preGuiPopulator(final Inventory gui, Player player) {
 		schematics.clear();
 		
 		final int availableSlots = config.getInt("inventory-rows", 1) * 9;
@@ -46,6 +47,8 @@ public class SchematicSelectorGui extends AbstractGui {
 			} else {
 				ItemUtils.setItemNameAndLore(item, schematic.getMenuTitle(), schematic.getNoPermLore());
 			}
+			
+			gui.setItem(slot, item);
 			
 			slot++;
 			if (slot == availableSlots) {

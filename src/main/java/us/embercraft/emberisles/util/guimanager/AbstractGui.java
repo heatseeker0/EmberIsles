@@ -23,9 +23,10 @@ public abstract class AbstractGui {
 	
 	/**
 	 *  Called automatically by {@link #createGui(Player)} before it populates the Gui with items. Do any general processing here.
+	 *  @param gui The GUI that's being built
 	 *  @param player Player this GUI will be sent to
 	 */
-	protected abstract void preGuiPopulator(final Player player);
+	protected abstract void preGuiPopulator(final Inventory gui, final Player player);
 	
 	/**
 	 * Called automatically by {@link #createGui(Player)} after it creates but before it adds a new item to the Gui.
@@ -68,7 +69,7 @@ public abstract class AbstractGui {
 		String title;
 		List<String> lore;
 		
-		preGuiPopulator(player);
+		preGuiPopulator(gui, player);
 		ConfigurationSection items = config.getConfigurationSection("items");
 		
 		// Dynamic GUIs may have no items section.

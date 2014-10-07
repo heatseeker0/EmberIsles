@@ -7,6 +7,7 @@ import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import us.embercraft.emberisles.EmberIsles;
@@ -24,7 +25,7 @@ public class WorldSelectorGui extends AbstractGui {
 	}
 
 	@Override
-	protected void preGuiPopulator(Player player) {
+	protected void preGuiPopulator(final Inventory gui, Player player) {
 		worldTypes.clear();
 	}
 
