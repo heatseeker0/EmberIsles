@@ -8,27 +8,57 @@ public class WorldSettings {
 		 * Actual values initialized at runtime via config. Sane defaults are provided here in case
 		 * the config section for a specific WorldType goes missing.
 		 */
-		islandSize = 12;
-		borderSize = 2;
+		islandChunkSize = 12;
+		borderChunkSize = 2;
 		y = 128;
 		startingBiome = Biome.PLAINS;
 		allowParty = true;
 		islandsPerRow = 100;
+		updateWorldGranularity();
+		updateIslandSize();
 	}
 	
+	private void updateWorldGranularity() {
+		worldGranularity = (islandChunkSize + borderChunkSize) << 3;
+	}
+	
+	private void updateIslandSize() {
+		islandSize = islandChunkSize << 3;
+	}
+	
+	/**
+	 * Returns the island size, in chunks.
+	 * @return Island size, in chunks
+	 */
+	public int getIslandChunkSize() {
+		return islandChunkSize;
+	}
+	
+	public void setIslandChunkSize(int islandChunkSize) {
+		this.islandChunkSize = islandChunkSize;
+		updateWorldGranularity();
+		updateIslandSize();
+	}
+	
+	/**
+	 * Returns the island size in blocks.
+	 * @return Island size in blocks
+	 */
 	public int getIslandSize() {
 		return islandSize;
 	}
-	public void setIslandSize(int islandSize) {
-		this.islandSize = islandSize;
+
+	/**
+	 * Returns the border bettwen islands size, in chunks.
+	 * @return Border bettwen islands size, in chunks
+	 */
+	public int getBorderChunkSize() {
+		return borderChunkSize;
 	}
 
-	public int getBorderSize() {
-		return borderSize;
-	}
-
-	public void setBorderSize(int borderSize) {
-		this.borderSize = borderSize;
+	public void setBorderChunkSize(int borderChunkSize) {
+		this.borderChunkSize = borderChunkSize;
+		updateWorldGranularity();
 	}
 
 	public int getY() {
@@ -37,6 +67,17 @@ public class WorldSettings {
 
 	public void setY(int y) {
 		this.y = y;
+	}
+	
+	/**
+	 * Retrieves the world granularity, i.e. the number of world blocks between corner A of one island and corner A of next
+	 * island. It's calculated as <pre>({@link #getIslandChunkSize()} + {@link #getBorderChunkSize()}) * 8</pre> and the result is
+	 * cached for speed.
+	 * 
+	 * @return World granularity
+	 */
+	public int getWorldGranularity() {
+		return worldGranularity;
 	}
 
 	public Biome getStartingBiome() {
@@ -71,9 +112,18 @@ public class WorldSettings {
 		this.islandsPerRow = islandsPerRow;
 	}
 
-	private int islandsPerRow;
+	/*
+	 * Calculated values
+	 */
+	private int worldGranularity;
 	private int islandSize;
-	private int borderSize;
+	
+	/*
+	 * Settings
+	 */
+	private int islandsPerRow;
+	private int islandChunkSize;
+	private int borderChunkSize;
 	private int y;
 	private Biome startingBiome;
 	private boolean allowParty;

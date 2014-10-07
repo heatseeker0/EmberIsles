@@ -8,9 +8,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
+import org.bukkit.Location;
 import org.bukkit.World;
 
 import us.embercraft.emberisles.datatypes.Island;
@@ -348,6 +350,84 @@ public class WorldManager {
 			return freeIslands.get(type).pollFirst();
 		}
 		return islandAllocators.get(type).next();
+	}
+	
+	/**
+	 * Transforms grid coordinates into island corner A (top left corner) block coordinates. Y is 0.
+	 * @param type World type
+	 * @param gridX Grid X coordinate
+	 * @param gridZ Grid Z coordinate
+	 * @return Island corner A block coordinates
+	 */
+	public Location gridToWorldCoordA(WorldType type, int gridX, int gridZ) {
+		final WorldSettings settings = defaultWorldSettings.get(type);
+		int locX = gridX * settings.getWorldGranularity();
+		int locZ = gridZ * settings.getWorldGranularity();
+		return new Location(bukkitWorld.get(type), locX, 0, locZ);
+	}
+	
+	/**
+	 * Transforms grid coordinates into island corner B (bottom right) block coordinates. Y is 255.
+	 * @param type World type
+	 * @param gridX Grid X coordinate
+	 * @param gridZ Grid Z coordinate
+	 * @return Island corner B block coordinates
+	 */
+	public Location gridToWorldCoordB(WorldType type, int gridX, int gridZ) {
+		final WorldSettings settings = defaultWorldSettings.get(type);
+		int locX = gridX * settings.getWorldGranularity() + settings.getIslandSize();
+		int locZ = gridZ * settings.getWorldGranularity();
+		return new Location(bukkitWorld.get(type), locX, 255, locZ);
+	}
+	
+	/**
+	 * Given a Bukkit world returns the associated world type or null if this world is not managed by {@link WorldManager}.
+	 * @param world Bukkit world
+	 * @return Associated world type or null if this world is not managed by WorldManager
+	 */
+	public WorldType bukkitWorldToWorldType(final World world) {
+		if (world != null && bukkitWorld.values().contains(world)) {
+			for (Entry<WorldType, World> entry : bukkitWorld.entrySet()) {
+				if (entry.getValue().equals(world)) {
+					return entry.getKey();
+				}
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Transforms world coordinates into grid coordinates. If the world coordinates map to the space between
+	 * islands or are outside the island space returns null.
+	 * 
+	 * <p>If world type is null then it is calculated by calling {@link #bukkitWorldToWorldType(World)}. For
+	 * speed reasons it's preferred to use non-null values if possible.</p>
+	 * 
+	 * @param type World type or null if not known
+	 * @param loc World coordinates
+	 * @return Grid coordinates or null if the coordinates are outside of an island
+	 */
+	public IslandLookupKey worldToGridCoord(WorldType type, final Location loc) {
+		if (loc == null) {
+			return null;
+		}
+		if (type == null) {
+			type = bukkitWorldToWorldType(loc.getWorld());
+			if (type == null) {
+				return null;
+			}
+		}
+		int locX = loc.getBlockX();
+		int locZ = loc.getBlockZ();
+		if (locX < 0 || locZ < 0) {
+			return null;
+		}
+		WorldSettings settings = defaultWorldSettings.get(type);
+		if ((locX % settings.getWorldGranularity() <= settings.getIslandSize()) &&
+				(locZ % settings.getWorldGranularity() <= settings.getIslandSize())) {
+			return new IslandLookupKey(locX / settings.getWorldGranularity(), locZ / settings.getWorldGranularity());
+		}
+		return null;
 	}
 	
 	private static WorldManager instance = null;

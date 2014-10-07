@@ -54,19 +54,34 @@ public class WorldEditAPI {
 		editSession = new EditSession(new BukkitWorld(world), worldEdit.getConfiguration().maxChangeLimit);
 	}
 	
-	private Vector getPastePosition(Location loc) throws EmptyClipboardException {
-		if (loc == null)
-			return localSession.getClipboard().getOrigin();
-		return new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
-	}
-	
-	public boolean pasteSchematic(final File schematic, Location pasteLocation) {
+	/**
+	 * Pastes a schematic optionally centering it around specified paste location. If the paste location is null
+	 * the schematic will be pasted at the original point it was taken that is saved within the schematic.
+	 * 
+	 * @param schematic File containing the schematic
+	 * @param pasteLoc In-game location the schematic will be pasted. If null schematic will be pasted at the original location it was taken from.
+	 * @param centered True to paste the schematic centered around specified non-null paste location. If the paste location is null this setting is ignored.
+	 * @return True on success
+	 */
+	public boolean pasteSchematic(final File schematic, Location pasteLoc, boolean centered) {
 		try {
 			final File file = worldEdit.getSafeSaveFile(null, schematic.getParentFile(), schematic.getName(), EXTENSION, new String[] { EXTENSION });
 
 			editSession.enableQueue();
 			localSession.setClipboard(SchematicFormat.MCEDIT.load(file));
-			localSession.getClipboard().place(editSession, getPastePosition(pasteLocation), false);
+			Vector pasteLocation = localSession.getClipboard().getOrigin();
+			if (pasteLoc != null) {
+				pasteLocation = new Vector(pasteLoc.getBlockX(), pasteLoc.getBlockY(), pasteLoc.getBlockZ());
+				if (centered) {
+					int width = localSession.getClipboard().getWidth() / 2;
+					int length = localSession.getClipboard().getLength() / 2;
+					pasteLocation = pasteLocation.subtract(width, 0, length);
+				}
+			}
+			/*
+			 * Don't paste air blocks (increases speed, reduces block count) and paste entities in case we have any saved in the schematic.
+			 */
+			localSession.getClipboard().paste(editSession, pasteLocation, ignoreAirBlocks, pasteEntities);
 			editSession.flushQueue();
 			worldEdit.flushBlockBag(null, editSession);
 			return true;
@@ -89,11 +104,24 @@ public class WorldEditAPI {
 		return false;
 	}
 	
+	/**
+	 * Sets up paste settings that will take effect on all subsequent pastes. By default both settings are false. 
+	 * 
+	 * @param ignoreAirBlocks True to ignore (not paste) air blocks. Helps with speed and maximum blocks limit
+	 * @param pasteEntities True to paste any entities saved in the schematic
+	 */
+	public void setPasteAttrib(boolean ignoreAirBlocks, boolean pasteEntities) {
+		this.ignoreAirBlocks = ignoreAirBlocks;
+		this.pasteEntities = pasteEntities;
+	}
+	
 	private static final String EXTENSION = "schematic";
 	private static WorldEditPlugin plugin = null;
 	private static WorldEdit worldEdit = null;
 	private static boolean printStackTraces = false;
 	
+	private boolean ignoreAirBlocks = false;
+	private boolean pasteEntities = false;
 	private final LocalSession localSession;
 	private final EditSession editSession;
 }

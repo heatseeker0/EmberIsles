@@ -24,6 +24,8 @@ import us.embercraft.emberisles.datatypes.IslandProtectionFlag;
 import us.embercraft.emberisles.datatypes.SchematicDefinition;
 import us.embercraft.emberisles.datatypes.WorldSettings;
 import us.embercraft.emberisles.datatypes.WorldType;
+import us.embercraft.emberisles.gui.SchematicSelectorGui;
+import us.embercraft.emberisles.gui.WorldSelectorGui;
 import us.embercraft.emberisles.thirdparty.VaultAPI;
 import us.embercraft.emberisles.thirdparty.WorldEditAPI;
 import us.embercraft.emberisles.util.MessageUtils;
@@ -142,6 +144,9 @@ public class EmberIsles extends JavaPlugin {
 		
 		worldGenerator = config.getString("world-generator", "CleanroomGenerator:.");
 		
+		/*
+		 * Set up default island protection flags
+		 */
 		for (IslandProtectionAccessLevel accessLevel : IslandProtectionAccessLevel.values()) {
 			BitSet bits = new BitSet();
 			for (IslandProtectionFlag flag : IslandProtectionFlag.values()) {
@@ -150,11 +155,14 @@ public class EmberIsles extends JavaPlugin {
 			defaultProtectionFlags.put(accessLevel, bits);
 		}
 		
+		/*
+		 * Set up default world settings for all world types
+		 */
 		for (WorldType type : WorldType.values()) {
 			WorldSettings settings = new WorldSettings();
 			settings.setBukkitWorldName(config.getString(String.format("world-settings.%s.bukkit-name", type.getConfigKey())));
-			settings.setIslandSize(config.getInt(String.format("world-settings.%s.island-size", type.getConfigKey()), settings.getIslandSize()));
-			settings.setBorderSize(config.getInt(String.format("world-settings.%s.border-size", type.getConfigKey()), settings.getBorderSize()));
+			settings.setIslandChunkSize(config.getInt(String.format("world-settings.%s.island-size", type.getConfigKey()), settings.getIslandChunkSize()));
+			settings.setBorderChunkSize(config.getInt(String.format("world-settings.%s.border-size", type.getConfigKey()), settings.getBorderChunkSize()));
 			settings.setY(config.getInt(String.format("world-settings.%s.y", type.getConfigKey()), settings.getY()));
 			try {
 				settings.setStartingBiome(Biome.valueOf(config.getString(String.format("world-settings.%s.starting-biome", type.getConfigKey()),
@@ -169,6 +177,9 @@ public class EmberIsles extends JavaPlugin {
 		
 		final File dataFolder = getDataFolder();
 		
+		/*
+		 * Set up all schematic definitions
+		 */
 		for (WorldType type : WorldType.values()) {
 			getWorldManager().clearSchematicDefinitions(type);
 			for (String schemKey : config.getConfigurationSection(String.format("schematics.%s", type.getConfigKey())).getKeys(false)) {
@@ -201,8 +212,15 @@ public class EmberIsles extends JavaPlugin {
 		
 		setupAutomaticAllocators();
 		
-		//TODO: Set up the gui screens
+		/*
+		 * Set up all GUI screens
+		 */
+		getGuiManager().addNewGui(new WorldSelectorGui(config.getConfigurationSection("gui-screens.world-selector")));
+		getGuiManager().addNewGui(new SchematicSelectorGui(config.getConfigurationSection("gui-screens.schematic-selector")));
 		
+		/*
+		 * Set up automated data store saving tasks
+		 */
 		if (playersAutoSaveTaskId > 0) {
 			Bukkit.getScheduler().cancelTask(playersAutoSaveTaskId);
 			playersAutoSaveTaskId = -1;
@@ -260,7 +278,7 @@ public class EmberIsles extends JavaPlugin {
     }
 	
 	/**
-	 * Saves the island maps to disk.
+	 * Saves the occupied and free island maps to disk.
 	 * @param type World type
 	 */
 	protected void saveDatFilesWorld(WorldType type) {
@@ -277,7 +295,7 @@ public class EmberIsles extends JavaPlugin {
 	}
 	
 	/**
-	 * Loads the island world data from disk.
+	 * Loads the occupied and free island maps from disk.
 	 * @param type World type
 	 * @return Returns true if the maps were successfully loaded, false on error.
 	 */
