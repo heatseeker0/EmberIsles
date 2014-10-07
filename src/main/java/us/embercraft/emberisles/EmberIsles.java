@@ -220,8 +220,11 @@ public class EmberIsles extends JavaPlugin {
 				}
 				final String schemFileName = config.getString(String.format("schematics.%s.%s.file", type.getConfigKey(), schemKey));
 				File schemFile = new File(dataFolder, schemFileName);
-				if (!schemFile.exists() && hasJarResource(schemFileName)) {
-					saveJarResource(schemFileName);
+				if (!schemFile.exists()) {
+					logInfoMessage(String.format("Schematic %s not found on disk. Is in jar: %s", schemFileName, Boolean.toString(hasJarResource(schemFileName))));
+					if (hasJarResource(schemFileName)) { 
+						saveJarResource(schemFileName);
+					}
 				}
 				if (!schemFile.exists()) {
 					logErrorMessage(String.format("The specified file for schematic schematics.%s.%s is missing. This schematic will be ignored until this error is fixed.", type.getConfigKey(), schemKey));
