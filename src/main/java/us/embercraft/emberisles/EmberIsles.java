@@ -210,12 +210,19 @@ public class EmberIsles extends JavaPlugin {
 		for (WorldType type : WorldType.values()) {
 			getWorldManager().clearSchematicDefinitions(type);
 			for (String schemKey : config.getConfigurationSection(String.format("schematics.%s", type.getConfigKey())).getKeys(false)) {
-				if (!config.contains(String.format("schematics.%s.%s.permission", type.getConfigKey(), schemKey)) ||
-						!config.contains(config.getString(String.format("schematics.%s.%s.file", type.getConfigKey(), schemKey)))) {
-					logErrorMessage(String.format("One or more mandatory settings for schematic definition schematics.%s.%s is missing. This schematic will be ignored until this error is fixed.", type.getConfigKey(), schemKey));
+				if (!config.contains(String.format("schematics.%s.%s.permission", type.getConfigKey(), schemKey))) {
+					logErrorMessage(String.format("Permission node for schematic schematics.%s.%s is missing. This schematic will be ignored until this error is fixed.", type.getConfigKey(), schemKey));
 					continue;
 				}
-				File schemFile = new File(dataFolder, config.getString(String.format("schematics.%s.%s.file", type.getConfigKey(), schemKey)));
+				if (!config.contains(String.format("schematics.%s.%s.file", type.getConfigKey(), schemKey))) {
+					logErrorMessage(String.format("File node for schematic definition schematics.%s.%s is missing. This schematic will be ignored until this error is fixed.", type.getConfigKey(), schemKey));
+					continue;
+				}
+				final String schemFileName = config.getString(String.format("schematics.%s.%s.file", type.getConfigKey(), schemKey));
+				File schemFile = new File(dataFolder, schemFileName);
+				if (!schemFile.exists() && hasJarResource(schemFileName)) {
+					saveJarResource(schemFileName);
+				}
 				if (!schemFile.exists()) {
 					logErrorMessage(String.format("The specified file for schematic schematics.%s.%s is missing. This schematic will be ignored until this error is fixed.", type.getConfigKey(), schemKey));
 					continue;
@@ -276,6 +283,21 @@ public class EmberIsles extends JavaPlugin {
 			getWorldManager().initializeAllocator(type);
 		}
 		logInfoMessage("[Allocators set up]");
+	}
+	
+	/**
+	 * Saves a resource file embedded in the plugin Jar to disk if it doesn't already exist.
+	 * @param name Resource file name
+	 */
+	private void saveJarResource(final String name) {
+		File dataFile = new File(getDataFolder(), name);
+		if (!dataFile.exists()) {
+			saveResource(name, false);
+		}
+	}
+	
+	private boolean hasJarResource(final String name) {
+		return getClassLoader().getResource(name) != null;
 	}
 	
     /**
