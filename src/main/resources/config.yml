@@ -78,6 +78,8 @@ schematics:
       file: "donator1.schematic"
       home-block: BEDROCK
       title: "&6Big island"
+      icon: DIAMOND_BLOCK
+      durability: 0
       permission: "emberisles.schematic.normal.donator1"
       lore:
       - "&6Donator only skyblock"
@@ -92,6 +94,8 @@ schematics:
       file: "starter.schematic"
       home-block: BEDROCK
       title: "&aClassic"
+      icon: GRASS
+      durability: 0
       permission: "emberisles.schematic.challenge.default"
       lore:
       - "&aThis is the classic skyblock"
@@ -106,6 +110,8 @@ schematics:
       file: "starter.schematic"
       home-block: BEDROCK
       title: "&aClassic"
+      icon: GRASS
+      durability: 0
       permission: "emberisles.schematic.hardcore.default"
       lore:
       - "&aThis is the classic skyblock"
