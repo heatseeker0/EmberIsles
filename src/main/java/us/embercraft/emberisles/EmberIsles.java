@@ -490,14 +490,23 @@ public class EmberIsles extends JavaPlugin {
 		island.setOwner(player.getUniqueId());
 		island.setOwnerLoginTime(System.currentTimeMillis());
 		island.setSchematic(cmd.getSchematic().getName());
-		getWorldManager().addIsland(cmd.getWorldType(), island);
 		
 		final Location pasteLoc = getWorldManager().gridToWorldCoordA(cmd.getWorldType(), key.getGridX(), key.getGridZ()).add(
 				getWorldManager().getDefaultWorldSettings(cmd.getWorldType()).getIslandSize() >> 1,
 				getWorldManager().getDefaultWorldSettings(cmd.getWorldType()).getY(),
 				getWorldManager().getDefaultWorldSettings(cmd.getWorldType()).getIslandSize() >> 1);
 		
-		getWorldManager().getWorldEditAPI(cmd.getWorldType()).pasteSchematic(cmd.getSchematic().getSchematicFile(), pasteLoc, true);
+		/*
+		 * Paste first and if we get an error stop the island creation process.
+		 */
+		if (!getWorldManager().getWorldEditAPI(cmd.getWorldType()).pasteSchematic(cmd.getSchematic().getSchematicFile(), pasteLoc, true)) {
+			logErrorMessage(String.format("WorldEdit error while pasting schematic %s. There should be more details about the actual error above this line.", cmd.getSchematic().getName()));
+			player.sendMessage(getMessage("error-schematic-format"));
+			return;
+		}
+		
+		getWorldManager().addIsland(cmd.getWorldType(), island);
+
 		Location cornerA = getWorldManager().getWorldEditAPI(cmd.getWorldType()).getLastPasteCornerA();
 		Location cornerB = getWorldManager().getWorldEditAPI(cmd.getWorldType()).getLastPasteCornerB();
 		

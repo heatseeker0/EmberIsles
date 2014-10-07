@@ -220,3 +220,4 @@ messages:
   error-no-free-islands: "&cCurrently there are no more free islands available in world %s. Inform an administrator about this."
   error-not-from-console: "&cYou can't run this command from console."
   error-internal-misconfigured: "&cPlugin is misconfigured. Inform an administrator about this."
+  error-schematic-format: "&cSchematic is in wrong format. Try using a different schematic and inform an administrator about this."

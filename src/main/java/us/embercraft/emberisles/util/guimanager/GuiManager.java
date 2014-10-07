@@ -64,7 +64,14 @@ public class GuiManager {
 		
 		for (AbstractGui gui : guiList) {
 			if (gui.getTitle().equals(menuTitle)) {
-				gui.handleMenuSelection(player, menuTitle, menuItem);
+				/*
+				 * Don't let any exceptions propagate out. We need to close the virtual chest no matter what else players will grab menu items.
+				 */
+				try {
+					gui.handleMenuSelection(player, menuTitle, menuItem);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				return gui;
 			}
 		}
