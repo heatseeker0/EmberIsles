@@ -16,7 +16,7 @@ import us.embercraft.emberisles.util.MessageUtils;
 public abstract class AbstractGui {
 	public AbstractGui(ConfigurationSection config) {
 		this.config = config;
-		menuTitle = config.getString("title", "No Title");
+		menuTitle = MessageUtils.parseColors(config.getString("title", "No Title"));
 		configKey = config.getName();
 	}
 	
