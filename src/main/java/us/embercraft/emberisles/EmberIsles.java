@@ -9,10 +9,14 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Biome;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -175,11 +179,20 @@ public class EmberIsles extends JavaPlugin {
 			getWorldManager().setDefaultWorldSettings(type, settings);
 		}
 		
-		final File dataFolder = getDataFolder();
+		/*
+		 * Set up WorldEdit API paste settings
+		 */
+		boolean ignoreAirBlocks = config.getBoolean("worldedit-api.ignore-air-blocks", false);
+		boolean pasteEntities = config.getBoolean("worldedit-api.paste-entities", false);
+		for (WorldType type : WorldType.values()) {
+			getWorldManager().getWorldEditAPI(type).setPasteAttrib(ignoreAirBlocks, pasteEntities);
+		}
 		
 		/*
 		 * Set up all schematic definitions
 		 */
+		final File dataFolder = getDataFolder();
+		
 		for (WorldType type : WorldType.values()) {
 			getWorldManager().clearSchematicDefinitions(type);
 			for (String schemKey : config.getConfigurationSection(String.format("schematics.%s", type.getConfigKey())).getKeys(false)) {
@@ -198,6 +211,10 @@ public class EmberIsles extends JavaPlugin {
 					logErrorMessage(String.format("Invalid icon for schematic schematics.%s.%s. This schematic will be ignored until this error is fixed.", type.getConfigKey(), schemKey));
 					continue;
 				}
+				Material homeBlockMaterial = Material.getMaterial(config.getString(String.format("schematics.%s.%s.home-block", type.getConfigKey(), schemKey)));
+				if (homeBlockMaterial == null) {
+					logInfoMessage(String.format("Invalid home block material for schematic schematics.%s.%s. This is not critical but islands using this schematic will have no home set.", type.getConfigKey(), schemKey));
+				}
 				SchematicDefinition definition = new SchematicDefinition(type,
 						material,
 						(short) config.getInt(String.format("schematics.%s.%s.durability", type.getConfigKey(), schemKey)),
@@ -205,7 +222,8 @@ public class EmberIsles extends JavaPlugin {
 						config.getString(String.format("schematics.%s.%s.permission", type.getConfigKey(), schemKey)),
 						schemFile,
 						MessageUtils.parseColors(config.getStringList(String.format("schematics.%s.%s.lore", type.getConfigKey(), schemKey))),
-						MessageUtils.parseColors(config.getStringList(String.format("schematics.%s.%s.noperm-lore", type.getConfigKey(), schemKey))));
+						MessageUtils.parseColors(config.getStringList(String.format("schematics.%s.%s.noperm-lore", type.getConfigKey(), schemKey))),
+						homeBlockMaterial);
 				getWorldManager().addSchematicDefinition(type, definition);
 			}
 		}
@@ -406,7 +424,7 @@ public class EmberIsles extends JavaPlugin {
 	 * @param player Player to set as owner for the island
 	 * @param cmd {@link FutureMenuCommand} island creation command
 	 */
-	public void createIsland(Player player, FutureMenuCommand cmd) {
+	public void createIsland(final Player player, FutureMenuCommand cmd) {
 		if (getWorldManager().getPlayerIsland(cmd.getWorldType(), player.getUniqueId()) != null) {
 			player.sendMessage(getMessage("error-already-island"));
 			return;
@@ -420,9 +438,55 @@ public class EmberIsles extends JavaPlugin {
 		Island island = new Island(key);
 		island.setOwner(player.getUniqueId());
 		island.setOwnerLoginTime(System.currentTimeMillis());
+		island.setSchematic(cmd.getSchematic().getName());
 		getWorldManager().addIsland(cmd.getWorldType(), island);
 		
-		// TODO: Paste the schematic, teleport player, etc.
+		final Location pasteLoc = getWorldManager().gridToWorldCoordA(cmd.getWorldType(), key.getGridX(), key.getGridZ()).add(
+				getWorldManager().getDefaultWorldSettings(cmd.getWorldType()).getIslandSize() >> 1,
+				getWorldManager().getDefaultWorldSettings(cmd.getWorldType()).getY(),
+				getWorldManager().getDefaultWorldSettings(cmd.getWorldType()).getIslandSize() >> 1);
+		
+		getWorldManager().getWorldEditAPI(cmd.getWorldType()).pasteSchematic(cmd.getSchematic().getSchematicFile(), pasteLoc, true);
+		Location cornerA = getWorldManager().getWorldEditAPI(cmd.getWorldType()).getLastPasteCornerA();
+		Location cornerB = getWorldManager().getWorldEditAPI(cmd.getWorldType()).getLastPasteCornerB();
+		
+		logInfoMessage(String.format("DEBUG: Paste coordinates - A = %s, B = %s", cornerA, cornerB));
+		/*
+		 * TODO: Possible optimization - we could scan the schematic for bedrock on plugin onEnable() and cache it, but by doing so we
+		 * give up the flexibility to replace the schematic with server running.
+		 */
+		World world = cornerA.getWorld();
+		Material homeMaterial = cmd.getSchematic().getHomeBlockType();
+		Location spawnLocation = null;
+		if (homeMaterial != null) {
+			for (int z = cornerA.getBlockZ(); z <= cornerB.getBlockZ(); z++) {
+				for (int y = cornerA.getBlockY(); y <= cornerB.getBlockY(); y++) {
+					for (int x = cornerA.getBlockX(); x <= cornerB.getBlockX(); x++) {
+						Block block = world.getBlockAt(x, y, z);
+						if (block != null && block.getType() == homeMaterial) {
+							spawnLocation = block.getLocation();
+							block.setType(Material.AIR);
+						}
+					}
+				}
+			}
+		}
+		if (spawnLocation == null) {
+			//TODO: set the home to a reasonable middle position if material was not found
+			logInfoMessage("DEBUG: spawnLocation == null");
+			return;
+		}
+		island.setSpawn(spawnLocation);
+		
+		final Location tpLoc = spawnLocation;
+		Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+			
+			@Override
+			public void run() {
+				player.teleport(tpLoc, TeleportCause.PLUGIN);
+			}
+			
+		}, 5L);
 	}
 	
 	/*

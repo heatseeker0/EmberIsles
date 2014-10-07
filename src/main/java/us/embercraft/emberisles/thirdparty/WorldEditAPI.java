@@ -70,13 +70,21 @@ public class WorldEditAPI {
 			editSession.enableQueue();
 			localSession.setClipboard(SchematicFormat.MCEDIT.load(file));
 			Vector pasteLocation = localSession.getClipboard().getOrigin();
+			int width = localSession.getClipboard().getWidth() / 2;
+			int length = localSession.getClipboard().getLength() / 2;
 			if (pasteLoc != null) {
+				pasteCornerA = pasteLoc;
+				pasteCornerB = pasteCornerA.add(localSession.getClipboard().getWidth(), localSession.getClipboard().getHeight(), localSession.getClipboard().getLength());
 				pasteLocation = new Vector(pasteLoc.getBlockX(), pasteLoc.getBlockY(), pasteLoc.getBlockZ());
 				if (centered) {
-					int width = localSession.getClipboard().getWidth() / 2;
-					int length = localSession.getClipboard().getLength() / 2;
 					pasteLocation = pasteLocation.subtract(width, 0, length);
+					pasteCornerA = pasteCornerA.subtract(width, 0, length);
+					pasteCornerB = pasteCornerB.subtract(width, 0, length);
 				}
+			} else {
+				//TODO: Verify this works correctly
+				pasteCornerA = new Location(((BukkitWorld) editSession.getWorld()).getWorld(), pasteLocation.getBlockX(), pasteLocation.getBlockY(), pasteLocation.getBlockZ());
+				pasteCornerB = pasteCornerA.add(localSession.getClipboard().getWidth(), localSession.getClipboard().getHeight(), localSession.getClipboard().getLength());
 			}
 			/*
 			 * Don't paste air blocks (increases speed, reduces block count) and paste entities in case we have any saved in the schematic.
@@ -115,11 +123,29 @@ public class WorldEditAPI {
 		this.pasteEntities = pasteEntities;
 	}
 	
+	/**
+	 * Returns the top left corner of the last paste area, or null if no paste was performed.
+	 * @return Top left corner of the last paste area
+	 */
+	public Location getLastPasteCornerA() {
+		return pasteCornerA;
+	}
+	
+	/**
+	 * Returns the bottom right corner of the last paste area, or null if no paste was performed.
+	 * @return Bottom right corner of the last paste area
+	 */
+	public Location getLastPasteCornerB() {
+		return pasteCornerB;
+	}
+	
 	private static final String EXTENSION = "schematic";
 	private static WorldEditPlugin plugin = null;
 	private static WorldEdit worldEdit = null;
 	private static boolean printStackTraces = false;
 	
+	private Location pasteCornerA = null;
+	private Location pasteCornerB = null;
 	private boolean ignoreAirBlocks = false;
 	private boolean pasteEntities = false;
 	private final LocalSession localSession;

@@ -39,6 +39,9 @@ public class MessageUtils {
 		return result;
 	}
 	
+	static public String stripColors(final String msg) {
+		return msg != null ? ChatColor.stripColor(msg) : null;
+	}
 	
 	/**
 	 * Formats time into human readable form.

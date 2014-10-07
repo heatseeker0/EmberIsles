@@ -38,7 +38,13 @@ world-settings:
     allow-party: false
     islands-per-row: 100
 
-#
+# Settings for the WorldEdit API
+worldedit-api:
+  # Leave this to true for increased island creation speed and support for larger islands
+  ignore-air-blocks: true
+  # This must be true if you have entities (e.g. animals) saved in your schematic and you want these restored.
+  paste-entities: true
+
 # Schematic definitions. These are grouped by world type. The actual schematic node name (schematic1,
 # schematic2, etc.) doesn't matter as long as it's unique for a given world type.
 #
@@ -54,6 +60,8 @@ schematics:
   normal:
     schematic1:
       file: "starter.schematic"
+      # Block type that will be searched for in schematic and when found will be replaced by air and the island spawn set at that location.
+      home-block: BEDROCK
       title: "&aClassic"
       icon: GRASS
       durability: 0
@@ -68,6 +76,7 @@ schematics:
       - "&9http://www.embercraft.us"
     schematic2:
       file: "donator1.schematic"
+      home-block: BEDROCK
       title: "&6Big island"
       permission: "emberisles.schematic.normal.donator1"
       lore:
@@ -81,6 +90,7 @@ schematics:
   challenge:
     schematic1:
       file: "starter.schematic"
+      home-block: BEDROCK
       title: "&aClassic"
       permission: "emberisles.schematic.challenge.default"
       lore:
@@ -94,6 +104,7 @@ schematics:
   hardcore:
     schematic1:
       file: "starter.schematic"
+      home-block: BEDROCK
       title: "&aClassic"
       permission: "emberisles.schematic.hardcore.default"
       lore:

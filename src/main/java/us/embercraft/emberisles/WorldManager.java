@@ -430,6 +430,16 @@ public class WorldManager {
 		return null;
 	}
 	
+	/**
+	 * Retrieves the WorldEdit API for the specified world type.
+	 * 
+	 * @param type World type
+	 * @return WorldEdit API for specified world type
+	 */
+	public WorldEditAPI getWorldEditAPI(WorldType type) {
+		return worldEditAPI.get(type);
+	}
+	
 	private static WorldManager instance = null;
 	
 	private final Map<WorldType, Map<IslandLookupKey, Set<Island>>> islandLookupCache = new HashMap<>();
