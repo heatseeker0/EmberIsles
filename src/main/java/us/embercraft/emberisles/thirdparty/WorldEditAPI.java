@@ -9,8 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 
-import us.embercraft.emberisles.EmberIsles;
-
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EmptyClipboardException;
 import com.sk89q.worldedit.FilenameException;
@@ -73,10 +71,14 @@ public class WorldEditAPI {
 			localSession.setClipboard(SchematicFormat.MCEDIT.load(file));
 			Vector pasteLocation = localSession.getClipboard().getOrigin();
 			Vector clipboardSize = localSession.getClipboard().getSize();
-			//EmberIsles.getInstance().logInfoMessage(String.format("pasteLocation: %s; clipboardSize: %s", pasteLocation.toString(), clipboardSize.toString()));
+			
 			int width = clipboardSize.getBlockX() / 2;
 			int length = clipboardSize.getBlockZ() / 2;
 			if (pasteLoc != null) {
+				/*
+				 * If we specify a paste location we don't care what the saved offset is. This is especially important if centered = true.
+				 */
+				localSession.getClipboard().setOffset(new Vector(0, 0, 0));
 				pasteCornerA = pasteLoc.clone();
 				pasteCornerB = pasteLoc.clone().add(clipboardSize.getBlockX(), clipboardSize.getBlockY(), clipboardSize.getBlockZ());
 				pasteLocation = new Vector(pasteLoc.getBlockX(), pasteLoc.getBlockY(), pasteLoc.getBlockZ());
@@ -90,6 +92,10 @@ public class WorldEditAPI {
 				pasteCornerA = new Location(((BukkitWorld) editSession.getWorld()).getWorld(), pasteLocation.getBlockX(), pasteLocation.getBlockY(), pasteLocation.getBlockZ());
 				pasteCornerB = pasteCornerA.clone().add(clipboardSize.getBlockX(), clipboardSize.getBlockY(), clipboardSize.getBlockZ());
 			}
+
+//			EmberIsles.getInstance().logInfoMessage(String.format("pasteLocation: %s; origin: %s; offset: %s; clipboardSize: %s", pasteLocation.toString(), 
+//					localSession.getClipboard().getOrigin().toString(), localSession.getClipboard().getOffset().toString(), clipboardSize.toString()));
+			
 			/*
 			 * Don't paste air blocks (increases speed, reduces block count) and paste entities in case we have any saved in the schematic.
 			 */

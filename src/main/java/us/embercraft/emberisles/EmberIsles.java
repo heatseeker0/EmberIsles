@@ -502,7 +502,7 @@ public class EmberIsles extends JavaPlugin {
 				getWorldManager().getDefaultWorldSettings(cmd.getWorldType()).getY(),
 				getWorldManager().getDefaultWorldSettings(cmd.getWorldType()).getIslandSize() >> 1);
 		
-		logInfoMessage(String.format("DEBUG: island grid - %s, pasteLoc - %s", key.toString(), pasteLoc.toString()));
+		//logInfoMessage(String.format("DEBUG: island grid - %s, pasteLoc - %s", key.toString(), pasteLoc.toString()));
 		
 		/*
 		 * Paste first and if we get an error stop the island creation process.
@@ -513,15 +513,22 @@ public class EmberIsles extends JavaPlugin {
 			return;
 		}
 		
-		getWorldManager().addIsland(cmd.getWorldType(), island);
-
 		Location cornerA = getWorldManager().getWorldEditAPI(cmd.getWorldType()).getLastPasteCornerA();
 		Location cornerB = getWorldManager().getWorldEditAPI(cmd.getWorldType()).getLastPasteCornerB();
 		
-		logInfoMessage(String.format("DEBUG: Paste corners - A = %s, B = %s", cornerA, cornerB));
+		// unlikely, but better be safe than sorry
+		if (cornerA == null || cornerB == null || cornerA.equals(cornerB)) {
+			logErrorMessage(String.format("WorldEdit error while pasting schematic %s. Is this an empty schematic?", cmd.getSchematic().getName()));
+			player.sendMessage(getMessage("error-schematic-format"));
+			return;
+		}
+		
+		getWorldManager().addIsland(cmd.getWorldType(), island);
+
 		/*
 		 * TODO: Possible optimization - we could scan the schematic for bedrock on plugin onEnable() and cache it, but by doing so we
-		 * give up the flexibility to replace the schematic with server running.
+		 * give up the flexibility to replace the schematic with server running. This is only worth it for huge schematics, and even then
+		 * any performance gains will only be seen if there's a lot of islands created at same time.
 		 */
 		World world = cornerA.getWorld();
 		Material homeMaterial = cmd.getSchematic().getHomeBlockType();
@@ -539,13 +546,27 @@ public class EmberIsles extends JavaPlugin {
 				}
 			}
 		}
+		
 		if (spawnLocation == null) {
-			//TODO: set the home to a reasonable middle position if material was not found
-			logInfoMessage("DEBUG: spawnLocation == null");
-			//return;
-			spawnLocation = cornerA;
+			/*
+			 * Set the home to a reasonable middle position if material was not found. This is not 100% foolproof,
+			 * i.e. if schematic is nothing but air blocks or it has only air blocks in the middle this will fail.
+			 */
+			spawnLocation = cornerB.toVector().getMidpoint(cornerA.toVector()).toLocation(cornerA.getWorld());
+			Block highestBlock = spawnLocation.getWorld().getHighestBlockAt(spawnLocation);
+			if (highestBlock != null) {
+				// block below
+				highestBlock = highestBlock.getWorld().getBlockAt(highestBlock.getLocation().subtract(0, 1, 0));
+			}
+			if (highestBlock == null || highestBlock.getType() == Material.AIR) {
+				logErrorMessage(String.format("Schematic %s has no home block and no suitable non-air block was found either. Islands made with this have no spawn point!", cmd.getSchematic().getSchematicFile()));
+				player.sendMessage(getMessage("error-schematic-nospawn"));
+				return;
+			}
+			spawnLocation = highestBlock.getLocation().add(0, 1, 0);
 		}
 		island.setSpawn(spawnLocation);
+		player.sendMessage(getMessage("island-created"));
 		
 		final Location tpLoc = spawnLocation;
 		Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
