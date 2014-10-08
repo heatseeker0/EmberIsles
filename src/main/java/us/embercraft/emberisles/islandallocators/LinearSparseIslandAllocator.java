@@ -40,18 +40,21 @@ public class LinearSparseIslandAllocator extends AbstractIslandAllocator {
 				currentGridX = island.getIslandGridX();
 			}
 		}
-		/*
-		 * Point to the next spot after last taken island and make sure it's an even spot and within
-		 * configured line length.
-		 * 
-		 */
-		currentGridX++;
-		if ((currentGridX & 1) == 0) {
+
+		if (!islands.isEmpty()) {
+			/*
+			 * Point to the next spot after last taken island and make sure it's an even spot and within
+			 * configured line length.
+			 * 
+			 */
 			currentGridX++;
-		}
-		if (currentGridX > lineLength) {
-			currentGridX = 0;
-			currentGridZ++;
+			if ((currentGridX & 1) == 0) {
+				currentGridX++;
+			}
+			if (currentGridX > lineLength) {
+				currentGridX = 0;
+				currentGridZ++;
+			}
 		}
 	}
 	
@@ -66,18 +69,21 @@ public class LinearSparseIslandAllocator extends AbstractIslandAllocator {
 				currentGridX = key.getGridX();
 			}
 		}
-		/*
-		 * Point to the next spot after last taken island and make sure it's an even spot and within
-		 * configured line length.
-		 * 
-		 */
-		currentGridX++;
-		if ((currentGridX & 1) == 0) {
+		
+		if (!keys.isEmpty()) {
+			/*
+			 * Point to the next spot after last taken island and make sure it's an even spot and within
+			 * configured line length.
+			 * 
+			 */
 			currentGridX++;
-		}
-		if (currentGridX > lineLength) {
-			currentGridX = 0;
-			currentGridZ++;
+			if ((currentGridX & 1) == 0) {
+				currentGridX++;
+			}
+			if (currentGridX > lineLength) {
+				currentGridX = 0;
+				currentGridZ++;
+			}
 		}
 	}
 	
@@ -105,6 +111,12 @@ public class LinearSparseIslandAllocator extends AbstractIslandAllocator {
 			currentGridZ++;
 		}
 		return result;
+	}
+	
+	@Override
+	public void clear() {
+		currentGridX = 0;
+		currentGridZ = 0;
 	}
 	
 	/**

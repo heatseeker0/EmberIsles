@@ -116,6 +116,9 @@ public class WorldManager {
 	 */
 	public void clear(final WorldType type) {
 		islands.get(type).clear();
+		islandLookupCache.get(type).clear();
+		playerLookupCache.get(type).clear();
+		islandAllocators.get(type).clear();
 		setDirty(type);
 	}
 	

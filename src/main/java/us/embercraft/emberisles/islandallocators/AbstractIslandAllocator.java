@@ -31,4 +31,9 @@ public abstract class AbstractIslandAllocator {
 	 * policies and settings.
 	 */
 	public abstract IslandLookupKey next();
+	
+	/**
+	 * Clears all allocator internal data structures and starts again at grid [0, 0].
+	 */
+	public abstract void clear();
 }

@@ -47,6 +47,11 @@ public class IslandLookupKey {
 	public int getGridZ() {
 		return islandGridZ;
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("[x: %s, z: %s]", islandGridX, islandGridZ);
+	}
 
 	private final int islandGridX;
 	private final int islandGridZ;

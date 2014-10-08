@@ -92,6 +92,8 @@ public class EmberIsles extends JavaPlugin {
 			pluginManager.disablePlugin(this);
     		return;
 		}
+		logInfoMessage(String.format("Loaded %d player accounts.", getPlayerManager().getAll().size()));
+		
 		logInfoMessage("** World data");
 		for (WorldType type : WorldType.values()) {
 			logInfoMessage(String.format("**** %s", type.getConfigKey()));
@@ -100,6 +102,7 @@ public class EmberIsles extends JavaPlugin {
 				pluginManager.disablePlugin(this);
 				return;
 			}
+			logInfoMessage(String.format("     loaded %d TAKEN and %d FREE islands", getWorldManager().getAllOccupied(type).size(), getWorldManager().getAllFree(type).size()));
 		}
 		logInfoMessage("[All loading done]");
 		
@@ -491,10 +494,15 @@ public class EmberIsles extends JavaPlugin {
 		island.setOwnerLoginTime(System.currentTimeMillis());
 		island.setSchematic(cmd.getSchematic().getName());
 		
+		/*
+		 * Paste location is in the middle of island size X and Z wise, and at config defined Y.
+		 */
 		final Location pasteLoc = getWorldManager().gridToWorldCoordA(cmd.getWorldType(), key.getGridX(), key.getGridZ()).add(
 				getWorldManager().getDefaultWorldSettings(cmd.getWorldType()).getIslandSize() >> 1,
 				getWorldManager().getDefaultWorldSettings(cmd.getWorldType()).getY(),
 				getWorldManager().getDefaultWorldSettings(cmd.getWorldType()).getIslandSize() >> 1);
+		
+		logInfoMessage(String.format("DEBUG: island grid - %s, pasteLoc - %s", key.toString(), pasteLoc.toString()));
 		
 		/*
 		 * Paste first and if we get an error stop the island creation process.
@@ -510,7 +518,7 @@ public class EmberIsles extends JavaPlugin {
 		Location cornerA = getWorldManager().getWorldEditAPI(cmd.getWorldType()).getLastPasteCornerA();
 		Location cornerB = getWorldManager().getWorldEditAPI(cmd.getWorldType()).getLastPasteCornerB();
 		
-		logInfoMessage(String.format("DEBUG: Paste coordinates - A = %s, B = %s", cornerA, cornerB));
+		logInfoMessage(String.format("DEBUG: Paste corners - A = %s, B = %s", cornerA, cornerB));
 		/*
 		 * TODO: Possible optimization - we could scan the schematic for bedrock on plugin onEnable() and cache it, but by doing so we
 		 * give up the flexibility to replace the schematic with server running.

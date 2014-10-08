@@ -73,7 +73,7 @@ public class WorldEditAPI {
 			localSession.setClipboard(SchematicFormat.MCEDIT.load(file));
 			Vector pasteLocation = localSession.getClipboard().getOrigin();
 			Vector clipboardSize = localSession.getClipboard().getSize();
-			EmberIsles.getInstance().logInfoMessage(String.format("pasteLocation: %s; clipboardSize: %s", pasteLocation.toString(), clipboardSize.toString()));
+			//EmberIsles.getInstance().logInfoMessage(String.format("pasteLocation: %s; clipboardSize: %s", pasteLocation.toString(), clipboardSize.toString()));
 			int width = clipboardSize.getBlockX() / 2;
 			int length = clipboardSize.getBlockZ() / 2;
 			if (pasteLoc != null) {

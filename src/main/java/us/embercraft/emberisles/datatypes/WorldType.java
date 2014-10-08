@@ -27,7 +27,7 @@ public enum WorldType {
 				return type;
 			}
 		}
-		return NORMAL_WORLD;
+		throw new IllegalArgumentException("Invalid configKey value " + configKey);
 	}
 	
 	private final String configKey;
