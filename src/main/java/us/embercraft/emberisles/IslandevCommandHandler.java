@@ -25,6 +25,17 @@ public class IslandevCommandHandler implements CommandExecutor {
 						sender.sendMessage(ChatColor.RED + String.format("Invalid world type %s. Allowed types are normal, challenge, hardcore.", split[1].toLowerCase()));
 					}
 					return true;
+					
+				case "testalloc":
+					try {
+						WorldType type = WorldType.getEnum(split[1].toLowerCase());
+						for (int i = 0; i < 10; i++) {
+							sender.sendMessage(String.format("Island %d: %s", i, plugin.getWorldManager().getNextFreeIslandLocation(type).toString()));
+						}
+					} catch (IllegalArgumentException e) {
+						sender.sendMessage(ChatColor.RED + String.format("Invalid world type %s. Allowed types are normal, challenge, hardcore.", split[1].toLowerCase()));
+					}
+					return true;
 			}
 		}
 		return false;
