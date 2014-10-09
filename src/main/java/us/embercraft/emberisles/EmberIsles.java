@@ -25,6 +25,7 @@ import us.embercraft.emberisles.datatypes.Island;
 import us.embercraft.emberisles.datatypes.IslandLookupKey;
 import us.embercraft.emberisles.datatypes.IslandProtectionAccessLevel;
 import us.embercraft.emberisles.datatypes.IslandProtectionFlag;
+import us.embercraft.emberisles.datatypes.PartyDefinitions;
 import us.embercraft.emberisles.datatypes.SchematicDefinition;
 import us.embercraft.emberisles.datatypes.WorldSettings;
 import us.embercraft.emberisles.datatypes.WorldType;
@@ -153,7 +154,7 @@ public class EmberIsles extends JavaPlugin {
 		
 		messages.clear();
 		for (String msgKey : config.getConfigurationSection("messages").getKeys(false)) {
-			messages.put(msgKey, MessageUtils.parseColors(config.getString("messages." + msgKey)));
+			messages.put(msgKey, MessageUtils.parseColors(config.getString(String.format("messages.%s", msgKey))));
 		}
 		
 		worldGenerator = config.getString("world-generator", "CleanroomGenerator:.");
@@ -167,6 +168,16 @@ public class EmberIsles extends JavaPlugin {
 				bits.set(flag.id(), config.getBoolean(String.format("island-protection-defaults.%s.%s", accessLevel.getConfigKey(), flag.getConfigKey()), false));
 			}
 			defaultProtectionFlags.put(accessLevel, bits);
+		}
+		
+		/*
+		 * Set up party definitions
+		 */
+		partyDefinitions.setMemberInviteExpire(config.getInt("party-settings.member-invite-expire", 60) * MILLISECONDS_PER_MINUTE);
+		partyDefinitions.setHelperInviteExpire(config.getInt("party-settings.helper-invite-expire", 60) * MILLISECONDS_PER_MINUTE);
+		for (String key : config.getConfigurationSection("party-settings.ranks").getKeys(false)) {
+			partyDefinitions.addPartyRank(config.getString(String.format("party-settings.ranks.%s.permission", key)), 
+					config.getInt(String.format("party-settings.ranks.%s.party-limit", key)));
 		}
 		
 		/*
@@ -437,6 +448,10 @@ public class EmberIsles extends JavaPlugin {
 		return defaultProtectionFlags.get(accessLevel);
 	}
 	
+	public PartyDefinitions getPartyDefinitions() {
+		return partyDefinitions;
+	}
+	
 	public String getWorldGenerator() {
 		return worldGenerator;
 	}
@@ -588,6 +603,7 @@ public class EmberIsles extends JavaPlugin {
     private static Logger logger = Logger.getLogger("Minecraft.EmberIsles");
     private PluginManager pluginManager;
     final static int TICKS_PER_MINUTE = 60 * 20;
+    final static long MILLISECONDS_PER_MINUTE = 60 * 1000L;
     private Map<UUID, FutureMenuCommand> futureCommands = new HashMap<>();
 	
 	/*
@@ -599,6 +615,7 @@ public class EmberIsles extends JavaPlugin {
 	private String worldGenerator;
 	private boolean worldEditIgnoreAirBlocks;
 	private boolean worldEditPasteEntities;
+	private final PartyDefinitions partyDefinitions = new PartyDefinitions();
 	private static GuiManager guiManager = GuiManager.getInstance();
 	
 	/*

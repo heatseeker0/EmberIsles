@@ -125,6 +125,21 @@ schematics:
       - "&cvisit our website at:"
       - "&9http://www.embercraft.us"
 
+party-settings:
+  # Times are in minutes
+  member-invite-expire: 60
+  helper-invite-expire: 60
+  ranks:
+    default-rank:
+      permission: "emberisles.use"
+      party-limit: 5
+    samplerank1:
+      permission: "emberisles.party.donator1"
+      party-limit: 10
+    samplerank2:
+      permission: "emberisles.party.donator2"
+      party-limit: 15
+
 island-protection-defaults:
   members:
     friendly-mobs: true

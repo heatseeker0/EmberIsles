@@ -11,6 +11,18 @@ public class InviteManager {
 	}
 	
 	public class Invite {
+		public Invite(InviteType type, UUID sender, UUID recipient, Island island) {
+			this(type, sender, recipient, island, 0);
+		}
+		
+		public Invite(InviteType type, UUID sender, UUID recipient, Island island, long helperDuration) {
+			this.type = type;
+			this.sender = sender;
+			this.recipient = recipient;
+			this.island = island;
+			this.helperDuration = helperDuration;
+		}
+		
 		private InviteType type;
 		private UUID sender;
 		private UUID recipient;
