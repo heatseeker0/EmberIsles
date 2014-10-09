@@ -185,6 +185,7 @@ public class EmberIsles extends JavaPlugin {
 				logErrorMessage(String.format("Wrong biome type in config.yml for key world-settings.%s.starting-biome. Using PLAINS for this world type.", type.getConfigKey()));
 			}
 			settings.setAllowParty(config.getBoolean(String.format("world-settings.%s.allow-party", type.getConfigKey()), settings.getAllowParty()));
+			settings.setAllowHelpers(config.getBoolean(String.format("world-settings.%s.allow-helpers", type.getConfigKey()), settings.getAllowHelpers()));
 			settings.setIslandsPerRow(config.getInt(String.format("world-settings.%s.islands-per-row", type.getConfigKey()), settings.getIslandsPerRow()));
 			getWorldManager().setDefaultWorldSettings(type, settings);
 		}

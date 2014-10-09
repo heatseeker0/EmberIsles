@@ -13,6 +13,7 @@ public class WorldSettings {
 		y = 128;
 		startingBiome = Biome.PLAINS;
 		allowParty = true;
+		allowHelpers = true;
 		islandsPerRow = 100;
 		updateWorldGranularity();
 		updateIslandSize();
@@ -96,6 +97,14 @@ public class WorldSettings {
 		this.allowParty = allowParty;
 	}
 
+	public boolean getAllowHelpers() {
+		return allowHelpers;
+	}
+
+	public void setAllowHelpers(boolean allowHelpers) {
+		this.allowHelpers = allowHelpers;
+	}
+	
 	public String getBukkitWorldName() {
 		return bukkitWorldName;
 	}
@@ -127,5 +136,6 @@ public class WorldSettings {
 	private int y;
 	private Biome startingBiome;
 	private boolean allowParty;
+	private boolean allowHelpers;
 	private String bukkitWorldName;
 }

@@ -26,7 +26,7 @@ public class PlayerManager {
 	 */
 	public void addPlayer(final UUID uuid, final String string) {
 		players.put(uuid, string);
-		playerIdLookup.put(string, uuid);
+		playerIdLookup.put(string.toLowerCase(), uuid);
 		setDirty();
 	}
 	
@@ -42,9 +42,10 @@ public class PlayerManager {
 	}
 	
 	/**
-	 * Retrieves the associated UUID for given player name or null if no match could be found.
-	 * @param name
-	 * @return
+	 * Retrieves the associated UUID for given player name or null if no match could be found. The
+	 * search is case insensitive.
+	 * @param name Player name to search for
+	 * @return UUID associated with player name or null for no match
 	 */
 	public UUID getIdByName(final String name) {
 		/*
@@ -52,7 +53,7 @@ public class PlayerManager {
 		 */
 		if (playerIdLookup.isEmpty() && !players.isEmpty())
 			rebuildPlayerIdLookup();
-		return playerIdLookup.get(name);
+		return playerIdLookup.get(name.toLowerCase());
 	}
 	
 	/**
@@ -81,12 +82,12 @@ public class PlayerManager {
 	}
 	
 	/**
-	 * Rebuilds the internal name -> uuid lookup table.
+	 * Rebuilds the internal name -> uuid lookup table. All names are converted to lowercase.
 	 */
 	private void rebuildPlayerIdLookup() {
 		playerIdLookup.clear();
 		for (Entry<UUID, String> entry : players.entrySet()) {
-			playerIdLookup.put(entry.getValue(), entry.getKey());
+			playerIdLookup.put(entry.getValue().toLowerCase(), entry.getKey());
 		}
 	}
 	
@@ -130,6 +131,9 @@ public class PlayerManager {
 	
 	private static PlayerManager instance = null;
 	transient private boolean dirtyFlag = false;
+	/**
+	 * <lowercase player name, player UUID>
+	 */
 	transient private Map<String, UUID> playerIdLookup = new HashMap<>();
 	
 	private final Map<UUID, String> players = new HashMap<>();

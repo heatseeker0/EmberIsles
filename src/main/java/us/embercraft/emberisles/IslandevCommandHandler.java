@@ -11,34 +11,42 @@ public class IslandevCommandHandler implements CommandExecutor {
 	public IslandevCommandHandler(EmberIsles plugin) {
 		this.plugin = plugin;
 	}
-	
+
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String split[]) {
 		if (split.length == 2) {
 			switch (split[0].toLowerCase()) {
 				case "clear":
-					try {
-						WorldType type = WorldType.getEnum(split[1].toLowerCase());
-						plugin.getWorldManager().clear(type);
-						sender.sendMessage(ChatColor.GREEN + "All island data has been deleted for world " + split[1].toLowerCase());
-					} catch (IllegalArgumentException e) {
-						sender.sendMessage(ChatColor.RED + String.format("Invalid world type %s. Allowed types are normal, challenge, hardcore.", split[1].toLowerCase()));
-					}
+					cmdClear(sender, split[1]);
 					return true;
-					
+
 				case "testalloc":
-					try {
-						WorldType type = WorldType.getEnum(split[1].toLowerCase());
-						for (int i = 0; i < 10; i++) {
-							sender.sendMessage(String.format("Island %d: %s", i, plugin.getWorldManager().getNextFreeIslandLocation(type).toString()));
-						}
-					} catch (IllegalArgumentException e) {
-						sender.sendMessage(ChatColor.RED + String.format("Invalid world type %s. Allowed types are normal, challenge, hardcore.", split[1].toLowerCase()));
-					}
+					cmdTestAlloc(sender, split[1]);
 					return true;
 			}
 		}
 		return false;
+	}
+
+	private void cmdClear(CommandSender sender, String worldType) {
+		WorldType type = CommandHandlerHelpers.worldNameToType(worldType);
+		if (type == null) {
+			sender.sendMessage(String.format(plugin.getMessage("error-invalid-world-type"), worldType.toLowerCase()));
+			return;
+		}
+		plugin.getWorldManager().clear(type);
+		sender.sendMessage(ChatColor.GREEN + "All island data has been deleted for world " + worldType.toLowerCase());
+	}
+
+	private void cmdTestAlloc(CommandSender sender, String worldType) {
+		WorldType type = CommandHandlerHelpers.worldNameToType(worldType);
+		if (type == null) {
+			sender.sendMessage(String.format(plugin.getMessage("error-invalid-world-type"), worldType.toLowerCase()));
+			return;
+		}
+		for (int i = 0; i < 10; i++) {
+			sender.sendMessage(String.format("Island %d: %s", i, plugin.getWorldManager().getNextFreeIslandLocation(type).toString()));
+		}
 	}
 
 	EmberIsles plugin;

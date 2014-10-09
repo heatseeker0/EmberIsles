@@ -17,6 +17,7 @@ world-settings:
     y: 128
     starting-biome: PLAINS
     allow-party: true
+    allow-helpers: true
     # Automatic allocator settings
     islands-per-row: 100
   challenge:
@@ -26,7 +27,8 @@ world-settings:
     border-size: 2
     y: 128
     starting-biome: TAIGA
-    allow-party: false
+    allow-party: true
+    allow-helpers: true
     islands-per-row: 100
   hardcore:
     bukkit-name: "islands-hardcore"
@@ -36,6 +38,7 @@ world-settings:
     y: 128
     starting-biome: HELL
     allow-party: false
+    allow-helpers: true
     islands-per-row: 100
 
 # Settings for the WorldEdit API
@@ -223,3 +226,6 @@ messages:
   error-schematic-format: "&cSchematic is in wrong format. Try using a different schematic and inform an admin about this."
   error-schematic-nospawn: "&cCould not find a suitable spawn point for your island. Ask an admin to set one for you."
   island-created: "&2Your island was created and you have been teleported to it."
+  error-invalid-world-type: "&cInvalid world type %s. Allowed types are normal, challenge, hardcore."
+  error-player-not-found: "&cCan't find specified player name."
+  error-not-island-owner: "&cYou don't own an island."
