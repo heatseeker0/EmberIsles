@@ -400,6 +400,15 @@ public class WorldManager {
 	}
 	
 	/**
+	 * Given a world type returns the associated Bukkit world.
+	 * @param type World type
+	 * @return Bukkit world
+	 */
+	public World getBukkitWorld(WorldType type) {
+		return bukkitWorld.get(type);
+	}
+	
+	/**
 	 * Transforms world coordinates into grid coordinates. If the world coordinates map to the space between
 	 * islands or are outside the island space returns null.
 	 * 
@@ -441,6 +450,36 @@ public class WorldManager {
 	 */
 	public WorldEditAPI getWorldEditAPI(WorldType type) {
 		return worldEditAPI.get(type);
+	}
+	
+	/**
+	 * Removes a member from specified island in the given world type.
+	 * @param type World type to work in
+	 * @param island Island to remove the member from
+	 * @param recipientId Member to remove
+	 */
+	public void removeIslandMember(WorldType type, Island island, UUID recipientId) {
+		if (!island.isMember(recipientId))
+			return;
+		
+		island.removeMember(recipientId);
+		playerLookupCache.get(type).remove(recipientId);
+		setDirty(type);
+	}
+	
+	/**
+	 * Adds a member to the specified island in the given world type.
+	 * @param type World type to work in
+	 * @param island Island to add the new member to
+	 * @param recipientId New member to add
+	 */
+	public void addIslandMember(WorldType type, Island island, UUID recipientId) {
+		if (island.isMember(recipientId))
+			return;
+		
+		island.addMember(recipientId);
+		playerLookupCache.get(type).put(recipientId, island);
+		setDirty(type);
 	}
 	
 	private static WorldManager instance = null;

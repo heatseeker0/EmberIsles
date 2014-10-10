@@ -126,7 +126,7 @@ schematics:
       - "&9http://www.embercraft.us"
 
 party-settings:
-  # Times are in minutes
+  # Invite expire times are in seconds
   member-invite-expire: 60
   helper-invite-expire: 60
   ranks:
@@ -244,3 +244,20 @@ messages:
   error-invalid-world-type: "&cInvalid world type %s. Allowed types are normal, challenge, hardcore."
   error-player-not-found: "&cCan't find specified player name."
   error-not-island-owner: "&cYou don't own an island."
+  error-already-member: "&c%s is already a member on your island."
+  error-already-pending: "&c%s already has a pending invite from you. You must wait before sending another invite to the same player."
+  error-has-another-island: "&c%s is already part of another island team."
+  error-you-another-island: "&cYou are already part of another island."
+  error-party-limit: "&cYour party is at maximum member count. You have to remove someone first before you can add more players."
+  error-world-noparty: "&cThis world doesn't allow parties."
+  member-invite-sent-recipient: "&aYou have received an invite to join %s island. To accept the invite do &6/island accept %s&a. The invite will expire in %d seconds."
+  member-invite-sent-sender: "&aMember invite sent to %s. It will expire in %d seconds."
+  error-player-not-online: "&c%s is not online right now."
+  error-not-member: "&c%s is not a member on your island."
+  member-remove-sender: "&2You have removed %s from your island."
+  member-remove-recipient: "&a%s has removed you from their island."
+  island-member-help: "&cUsage: /island member <add | remove> <normal | challenge | hardcore> <player name>"
+  error-no-invite: "&cYou don't have an invite from %s or it has already expired."
+  error-invalid-invite: "&cThis invite is no longer valid and cannot be accepted."
+  member-add-sender: "&2%s has accepted your invite and is now a member of your island."
+  member-add-recipient: "&2You are now added to %s island."

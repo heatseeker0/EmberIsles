@@ -16,7 +16,6 @@ import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -59,6 +58,13 @@ public class EmberIsles extends JavaPlugin {
 					logInfoMessage(String.format("World files for world %s auto-saved.", type.getConfigKey()));
 				}
 			}
+		}
+	}
+	
+	public class CleanupTicker implements Runnable {
+		@Override
+		public void run() {
+			getInviteManager().inviteExpirerTick();
 		}
 	}
 	
@@ -133,6 +139,11 @@ public class EmberIsles extends JavaPlugin {
 		
 		getCommand("island").setExecutor(new IslandCommandHandler(this));
 		getCommand("islandev").setExecutor(new IslandevCommandHandler(this));
+		
+		/*
+		 * Running the cleanup ticker every 2 seconds is good enough granularity.
+		 */
+		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new CleanupTicker() , 40L, 40L);
 	}
 	
 	@Override
@@ -173,8 +184,8 @@ public class EmberIsles extends JavaPlugin {
 		/*
 		 * Set up party definitions
 		 */
-		partyDefinitions.setMemberInviteExpire(config.getInt("party-settings.member-invite-expire", 60) * MILLISECONDS_PER_MINUTE);
-		partyDefinitions.setHelperInviteExpire(config.getInt("party-settings.helper-invite-expire", 60) * MILLISECONDS_PER_MINUTE);
+		partyDefinitions.setMemberInviteExpire(config.getInt("party-settings.member-invite-expire", 60) * MILLISECONDS_PER_SECOND);
+		partyDefinitions.setHelperInviteExpire(config.getInt("party-settings.helper-invite-expire", 60) * MILLISECONDS_PER_SECOND);
 		for (String key : config.getConfigurationSection("party-settings.ranks").getKeys(false)) {
 			partyDefinitions.addPartyRank(config.getString(String.format("party-settings.ranks.%s.permission", key)), 
 					config.getInt(String.format("party-settings.ranks.%s.party-limit", key)));
@@ -456,6 +467,10 @@ public class EmberIsles extends JavaPlugin {
 		return worldGenerator;
 	}
 	
+	public InviteManager getInviteManager() {
+		return inviteManager;
+	}
+	
 	public void addFutureCommand(final UUID playerId, final FutureMenuCommand cmd) {
 		futureCommands.put(playerId, cmd);
 	}
@@ -583,16 +598,7 @@ public class EmberIsles extends JavaPlugin {
 		}
 		island.setSpawn(spawnLocation);
 		player.sendMessage(getMessage("island-created"));
-		
-		final Location tpLoc = spawnLocation;
-		Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
-			
-			@Override
-			public void run() {
-				player.teleport(tpLoc, TeleportCause.PLUGIN);
-			}
-			
-		}, 5L);
+		CommandHandlerHelpers.delayedPlayerTeleport(player, spawnLocation);
 	}
 	
 	/*
@@ -604,7 +610,9 @@ public class EmberIsles extends JavaPlugin {
     private PluginManager pluginManager;
     final static int TICKS_PER_MINUTE = 60 * 20;
     final static long MILLISECONDS_PER_MINUTE = 60 * 1000L;
+    final static long MILLISECONDS_PER_SECOND = 1000L;
     private Map<UUID, FutureMenuCommand> futureCommands = new HashMap<>();
+    private InviteManager inviteManager = new InviteManager();
 	
 	/*
 	 * Config settings

@@ -1,5 +1,10 @@
 package us.embercraft.emberisles;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+
 import us.embercraft.emberisles.datatypes.WorldType;
 
 /**
@@ -24,5 +29,22 @@ public class CommandHandlerHelpers {
 		} catch (IllegalArgumentException e) {
 			return null;
 		}
+	}
+	
+	/**
+	 * Teleports player to location after 5 ticks.
+	 * @param player Player to teleport
+	 * @param location Location to teleport to
+	 */
+	public static void delayedPlayerTeleport(final Player player, final Location location) {
+		if (player == null || location == null) {
+			return;
+		}
+		Bukkit.getScheduler().scheduleSyncDelayedTask(EmberIsles.getInstance(), new Runnable() {
+			@Override
+			public void run() {
+				player.teleport(location, TeleportCause.PLUGIN);
+			}
+		}, 5L);
 	}
 }
