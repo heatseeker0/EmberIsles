@@ -9,6 +9,10 @@ public enum WorldType {
 		this.configKey = configKey;
 	}
 	
+	/**
+	 * Returns the configuration key for this world type. Can also be used to print the world type.
+	 * @return Configuration key
+	 */
 	public String getConfigKey() {
 		return configKey;
 	}

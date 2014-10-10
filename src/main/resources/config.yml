@@ -261,3 +261,5 @@ messages:
   error-invalid-invite: "&cThis invite is no longer valid and cannot be accepted."
   member-add-sender: "&2%s has accepted your invite and is now a member of your island."
   member-add-recipient: "&2You are now added to %s island."
+  error-no-island: "&cYou don't have an island in the %s world."
+  teleported-home: "&2You have been teleported to the island spawn."

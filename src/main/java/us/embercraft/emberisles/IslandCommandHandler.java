@@ -69,6 +69,26 @@ public class IslandCommandHandler implements CommandExecutor {
 	}
 	
 	/**
+	 * Teleport a player to her island home in specified world.
+	 * @param sender Player to teleport
+	 * @param string World type (normal, challenge, hardcore)
+	 */
+	private void cmdHome(Player sender, String worldTypeName) {
+		WorldType worldType = CommandHandlerHelpers.worldNameToType(worldTypeName);
+		if (worldType == null) {
+			sender.sendMessage(String.format(plugin.getMessage("error-invalid-world-type"), worldTypeName.toLowerCase()));
+			return;
+		}
+		Island island = plugin.getWorldManager().getPlayerIsland(worldType, sender.getUniqueId());
+		if (island == null) {
+			sender.sendMessage(String.format(plugin.getMessage("error-no-island"), worldType.getConfigKey()));
+			return;
+		}
+		sender.sendMessage(plugin.getMessage("teleported-home"));
+		CommandHandlerHelpers.delayedPlayerTeleport(sender, island.getSpawn().toLocation(plugin.getWorldManager().getBukkitWorld(worldType)));
+	}
+
+	/**
 	 * Accept a pending member or helper invite.
 	 * @param recipient Player that is accepting the invite
 	 * @param senderName Player name that sent the invite
@@ -119,6 +139,7 @@ public class IslandCommandHandler implements CommandExecutor {
 				senderPlayer.sendMessage(String.format(plugin.getMessage("member-add-sender"), recipient.getName()));
 				recipient.sendMessage(String.format(plugin.getMessage("member-add-recipient")));
 				if (island.getSpawn() != null) {
+					recipient.sendMessage(plugin.getMessage("teleported-home"));
 					CommandHandlerHelpers.delayedPlayerTeleport(recipient, island.getSpawn().toLocation(plugin.getWorldManager().getBukkitWorld(invite.getWorldType())));
 				}
 				break;
