@@ -31,5 +31,6 @@ permissions:
     children:
       emberisles.use: true
       emberisles.admin: true
+      # emberisles.admin.noexpel - expel immunity
       emberisles.challenges: true
     default: op

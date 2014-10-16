@@ -1,5 +1,6 @@
 package us.embercraft.emberisles;
 
+import java.util.Collection;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -54,8 +55,20 @@ public class IslandCommandHandler implements CommandExecutor {
 						// /island home <world type>
 						cmdHome(player, split[1]);
 						return true;
+					case "expel":
+						// /island expel <world type> [player name] - If player name isn't specified it expels everyone except members, helpers and players with emberisles.admin.noexpel permission node
+						cmdExpel(player, split[1], null);
+						return true;
 				}
 				break;
+			case 3:
+				switch (split[0].toLowerCase()) {
+					case "expel":
+						// /island expel <world type> [player name] - Expels specified player if not a member, helper and doesn't have emberisles.admin.noexpel
+						cmdExpel(player, split[1], split[2]);
+						return true;
+
+				}
 				
 			case 4:
 				switch (split[0].toLowerCase()) {
@@ -80,6 +93,37 @@ public class IslandCommandHandler implements CommandExecutor {
 				break;
 		}
 		return false;
+	}
+
+	/**
+	 * Expels one or more players from sender island. Can't expel members, helpers or players with emberisles.admin.noexpel permission node.
+	 *  
+	 * @param sender Owner or island member
+	 * @param worldTypeName World type (normal, challenge, hardcore)
+	 * @param target Player name to expel or null to expel all players that match the conditions.
+	 */
+	private void cmdExpel(Player sender, String worldTypeName , String target) {
+		WorldType worldType = CommandHandlerHelpers.worldNameToType(worldTypeName);
+		if (worldType == null) {
+			sender.sendMessage(String.format(plugin.getMessage("error-invalid-world-type"), worldTypeName.toLowerCase()));
+			return;
+		}
+		Island island = plugin.getWorldManager().getPlayerIsland(worldType, sender.getUniqueId());
+		if (island == null) {
+			sender.sendMessage(String.format(plugin.getMessage("error-no-island"), worldType.getConfigKey()));
+			return;
+		}
+		//TODO: If only island owner can expel, add check here
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			UUID playerId = player.getUniqueId();
+			if (!playerId.equals(island.getOwner()) &&
+					!island.isMember(playerId)) &&
+					!player.hasPermission("emberisles.admin.noexpel")
+		}
+	}
+	
+	private boolean expelPlayer(final Island island, final Player player) {
+		
 	}
 
 	/**

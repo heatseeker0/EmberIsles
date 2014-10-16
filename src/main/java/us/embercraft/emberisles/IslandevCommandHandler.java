@@ -4,6 +4,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.Player;
 
 import us.embercraft.emberisles.datatypes.WorldType;
 
@@ -14,18 +16,36 @@ public class IslandevCommandHandler implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String split[]) {
-		if (split.length == 2) {
-			switch (split[0].toLowerCase()) {
-				case "clear":
-					cmdClear(sender, split[1]);
-					return true;
-
-				case "testalloc":
-					cmdTestAlloc(sender, split[1]);
-					return true;
-			}
+		switch (split.length) {
+			case 1:
+				switch (split[0].toLowerCase()) {
+					case "setserverspawn":
+						cmdSetServerSpawn(sender);
+						return true;
+				}
+				break;
+			case 2:
+				switch (split[0].toLowerCase()) {
+					case "clear":
+						cmdClear(sender, split[1]);
+						return true;
+	
+					case "testalloc":
+						cmdTestAlloc(sender, split[1]);
+						return true;
+				}
+				break;
 		}
 		return false;
+	}
+
+	private void cmdSetServerSpawn(CommandSender sender) {
+		if (sender instanceof ConsoleCommandSender) {
+			sender.sendMessage(ChatColor.RED + "You have to be in game to set the server spawn location");
+			return;
+		}
+		plugin.setServerSpawn(((Player) sender).getLocation());
+		sender.sendMessage(ChatColor.GREEN + "Server spawn set.");
 	}
 
 	private void cmdClear(CommandSender sender, String worldType) {

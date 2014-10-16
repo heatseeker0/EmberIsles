@@ -1,6 +1,7 @@
 package us.embercraft.emberisles;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -33,6 +35,7 @@ import us.embercraft.emberisles.gui.SchematicSelectorGui;
 import us.embercraft.emberisles.gui.WorldSelectorGui;
 import us.embercraft.emberisles.thirdparty.VaultAPI;
 import us.embercraft.emberisles.thirdparty.WorldEditAPI;
+import us.embercraft.emberisles.util.LocationUtils;
 import us.embercraft.emberisles.util.MessageUtils;
 import us.embercraft.emberisles.util.SLAPI;
 import us.embercraft.emberisles.util.guimanager.GuiManager;
@@ -148,6 +151,7 @@ public class EmberIsles extends JavaPlugin {
 		
 		saveDefaultConfig();
 		applyConfig();
+		loadServerSettings();
 		
 		logInfoMessage("Loading Bukkit island worlds");
 		for (WorldType type : WorldType.values()) {
@@ -677,8 +681,69 @@ public class EmberIsles extends JavaPlugin {
 			spawnLocation = highestBlock.getLocation().add(0, 1, 0);
 		}
 		island.setSpawn(spawnLocation);
+		//TODO: Set island biome to configured default biome 
 		player.sendMessage(getMessage("island-created"));
 		CommandHandlerHelpers.delayedPlayerTeleport(player, spawnLocation);
+	}
+	
+	/**
+	 * Returns the global server spawn location.
+	 * @return Server spawn
+	 */
+	public Location getServerSpawn() {
+		return serverSpawn;
+	}
+	
+	/**
+	 * Sets the global server spawn location.
+	 * @param location Server spawn
+	 */
+	public void setServerSpawn(final Location location) {
+		serverSpawn = location;
+		saveServerSettings();
+	}
+	
+	/**
+	 * Saves global server settings directly modifiable with in game commands, such as server spawn.
+	 */
+	protected void saveServerSettings() {
+		FileConfiguration serverConfig = getConfig(SERVER_SETTINGS);
+		
+		if (serverSpawn != null) {
+			serverConfig.set("server-spawn", LocationUtils.exactLocationToString(serverSpawn));
+		}
+
+		try {
+			serverConfig.save(new File(getDataFolder(), SERVER_SETTINGS));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Loads global server settings directly modifiable with in game commands, such as server spawn.
+	 */
+	private void loadServerSettings() {
+		FileConfiguration serverConfig = getConfig(SERVER_SETTINGS);
+		try {
+			if (serverConfig.contains("server-spawn"))
+				serverSpawn = LocationUtils.parseExactLocation(serverConfig.getString("server-spawn"));
+		} catch (Exception e) {
+			// empty
+		}
+	}
+	
+	/**
+	 * Loads the specified yaml config file from disk. If the file doesn't already exist it attempts to save it from bundled resource files. 
+	 * @param name Yaml config file name
+	 * @return YamlConfiguration associated with specified file
+	 */
+	private FileConfiguration getConfig(String name) {
+		File configurationFile = new File(getDataFolder(), name);
+		if (!configurationFile.exists()) {
+			saveResource(name, false);
+		}
+		return YamlConfiguration.loadConfiguration(configurationFile);
 	}
 	
 	/*
@@ -705,6 +770,9 @@ public class EmberIsles extends JavaPlugin {
 	private boolean worldEditPasteEntities;
 	private final PartyDefinitions partyDefinitions = new PartyDefinitions();
 	private static GuiManager guiManager = GuiManager.getInstance();
+	
+	private static final String SERVER_SETTINGS = "settings.yml"; 
+	private Location serverSpawn;
 	
 	/*
 	 * Data store
