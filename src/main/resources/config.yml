@@ -1,6 +1,8 @@
 # Player data autosave time - in minutes, 0 to disable (NOT RECOMMENDED, WILL LOSE DATA ON SERVER CRASH!)
 player-auto-save: 17
-# World/Islands data autosave time - in minutes, 0 to disable (NOT RECOMMENDED, WILL LOSE DATA ON SERVER CRASH!)
+# Helper data autosave time - in minutes, 0 to disable (NOT RECOMMENDED!)
+helper-auto-save: 15
+# World/Islands data autosave time - in minutes, 0 to disable (NOT RECOMMENDED!)
 world-auto-save: 11
 
 # Caution should be exercised when modifying the world generator options

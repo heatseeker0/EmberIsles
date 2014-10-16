@@ -1,5 +1,7 @@
 package us.embercraft.emberisles.datatypes;
 
+import java.io.Serializable;
+
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -14,7 +16,7 @@ import javax.annotation.concurrent.ThreadSafe;
  */
 @Immutable
 @ThreadSafe
-public class IslandLookupKey {
+public class IslandLookupKey implements Serializable {
 	public IslandLookupKey(int islandGridX, int islandGridZ) {
 		this.islandGridX = islandGridX;
 		this.islandGridZ = islandGridZ;
@@ -56,4 +58,6 @@ public class IslandLookupKey {
 	private final int islandGridX;
 	private final int islandGridZ;
 	private final int hashCode;
+	
+	private static final long serialVersionUID = 1L;
 }

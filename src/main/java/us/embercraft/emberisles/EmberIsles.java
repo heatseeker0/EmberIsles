@@ -20,6 +20,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import us.embercraft.emberisles.datatypes.FutureMenuCommand;
+import us.embercraft.emberisles.datatypes.Helper;
 import us.embercraft.emberisles.datatypes.Island;
 import us.embercraft.emberisles.datatypes.IslandLookupKey;
 import us.embercraft.emberisles.datatypes.IslandProtectionAccessLevel;
@@ -61,10 +62,22 @@ public class EmberIsles extends JavaPlugin {
 		}
 	}
 	
+	public class AutoSaveHelpers implements Runnable {
+		@Override
+		public void run() {
+			if (getHelperManager().isDirty()) {
+				saveDatFilesHelper();
+				getHelperManager().clearDirty();
+				logInfoMessage("Helper files auto-saved");
+			}
+		}
+	}
+	
 	public class CleanupTicker implements Runnable {
 		@Override
 		public void run() {
 			getInviteManager().inviteExpirerTick();
+			getHelperManager().helpersExpirerTick();
 		}
 	}
 	
@@ -100,6 +113,14 @@ public class EmberIsles extends JavaPlugin {
     		return;
 		}
 		logInfoMessage(String.format("Loaded %d player accounts.", getPlayerManager().getAll().size()));
+		
+		logInfoMessage("** Helper data");
+		if (!loadDatFilesHelper()) {
+			logErrorMessage("Plugin disabled.");
+			pluginManager.disablePlugin(this);
+			return;
+		}
+		logInfoMessage(String.format("Loaded %d helper accounts.", getHelperManager().getAll().size()));
 		
 		logInfoMessage("** World data");
 		for (WorldType type : WorldType.values()) {
@@ -151,6 +172,8 @@ public class EmberIsles extends JavaPlugin {
 		logInfoMessage("Saving data structures:");
 		logInfoMessage("** Player data");
 		saveDatFilesPlayer();
+		logInfoMessage("** Helpers data");
+		saveDatFilesHelper();
 		logInfoMessage("** World data");
 		for (WorldType type : WorldType.values()) {
 			logInfoMessage(String.format("**** %s", type.getConfigKey()));
@@ -297,6 +320,14 @@ public class EmberIsles extends JavaPlugin {
         if (autoSave > 0)
         	playersAutoSaveTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new AutoSavePlayers(), autoSave * TICKS_PER_MINUTE, autoSave * TICKS_PER_MINUTE);
         
+        if (helpersAutoSaveTaskId > 0) {
+        	Bukkit.getScheduler().cancelTask(helpersAutoSaveTaskId);
+        	helpersAutoSaveTaskId = -1;
+        }
+        autoSave = config.getInt("helper-auto-save", 15);
+        if (autoSave > 0)
+        	helpersAutoSaveTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new AutoSaveHelpers(), autoSave * TICKS_PER_MINUTE, autoSave * TICKS_PER_MINUTE);
+        
         if (worldAutoSaveTaskId > 0) {
         	Bukkit.getScheduler().cancelTask(worldAutoSaveTaskId);
         	worldAutoSaveTaskId = -1;
@@ -327,6 +358,40 @@ public class EmberIsles extends JavaPlugin {
 	
 	private boolean hasJarResource(final String name) {
 		return getClassLoader().getResource(name) != null;
+	}
+	
+	/**
+	 * Saves the helper collection to disk.
+	 */
+	protected void saveDatFilesHelper() {
+    	if (!getDataFolder().exists()) {
+    		getDataFolder().mkdirs();
+    	}
+        try {
+            SLAPI.save(getHelperManager().getAll(), getDataFolder() + "/" + HELPERS_FILE);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+	}
+	
+	/**
+	 * Loads the helper collection from disk.
+	 * @return True if the collection was successfully loaded, false on error. 
+	 */
+	protected boolean loadDatFilesHelper() {
+    	final File dataFolder = getDataFolder();
+    	
+        if (getHelperManager().isEmpty() && (new File(dataFolder, HELPERS_FILE)).exists()) {
+            try {
+            	getHelperManager().addAll((Collection<Helper>) SLAPI.load(dataFolder + "/" + HELPERS_FILE));
+            }
+            catch(Exception e) {
+                logErrorMessage(String.format("Critical error while loading HELPER data from disk. Error message: %s", e.getMessage()));
+                e.printStackTrace();
+                return false;
+            }
+        }
+        return true;
 	}
 	
     /**
@@ -469,6 +534,10 @@ public class EmberIsles extends JavaPlugin {
 	
 	public InviteManager getInviteManager() {
 		return inviteManager;
+	}
+	
+	public HelperManager getHelperManager() {
+		return helperManager;
 	}
 	
 	public void addFutureCommand(final UUID playerId, final FutureMenuCommand cmd) {
@@ -632,6 +701,9 @@ public class EmberIsles extends JavaPlugin {
 	private int playersAutoSaveTaskId = -1;
 	public static final String PLAYERS_FILE = "players.dat";
 	private static PlayerManager playerManager = PlayerManager.getInstance();
+	private int helpersAutoSaveTaskId = -1;
+	public static final String HELPERS_FILE = "helpers.dat";
+	private static HelperManager helperManager = HelperManager.getInstance();
 	
 	private int worldAutoSaveTaskId = -1;
 	public static final String ISLANDS_FILE_TEMPLATE = "islands_%s.dat";
