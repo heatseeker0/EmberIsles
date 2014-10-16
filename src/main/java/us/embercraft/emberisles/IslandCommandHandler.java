@@ -151,14 +151,23 @@ public class IslandCommandHandler implements CommandExecutor {
 				plugin.getWorldManager().addIslandMember(invite.getWorldType(), island, recipient.getUniqueId());
 				plugin.getInviteManager().clearPlayerInvites(invite.getWorldType(), InviteType.ISLAND_ADD_MEMBER, recipient.getUniqueId());
 				senderPlayer.sendMessage(String.format(plugin.getMessage("member-add-sender"), recipient.getName()));
-				recipient.sendMessage(String.format(plugin.getMessage("member-add-recipient")));
+				recipient.sendMessage(String.format(plugin.getMessage("member-add-recipient"), senderPlayer.getName()));
 				if (island.getSpawn() != null) {
 					recipient.sendMessage(plugin.getMessage("teleported-home"));
 					CommandHandlerHelpers.delayedPlayerTeleport(recipient, island.getSpawn().toLocation(plugin.getWorldManager().getBukkitWorld(invite.getWorldType())));
 				}
 				break;
 			case ISLAND_ADD_HELPER:
-				//TODO: Write code for helpers
+				// Recipient already helper on this island
+				if (plugin.getHelperManager().isHelping(invite.getWorldType(), island.getLookupKey(), recipient.getUniqueId())) {
+					recipient.sendMessage(String.format(plugin.getMessage("error-already-helper-recipient"), senderName));
+					plugin.getInviteManager().remove(invite);
+					return;
+				}
+				plugin.getHelperManager().add(new Helper(invite.getWorldType(), island.getLookupKey(), recipient.getUniqueId(), invite.getHelperDuration()));
+				plugin.getInviteManager().remove(invite);
+				senderPlayer.sendMessage(String.format(plugin.getMessage("helper-add-sender"), recipient.getName()));
+				recipient.sendMessage(String.format(plugin.getMessage("helper-add-recipient"), senderPlayer.getName()));
 				break;
 		}
 	}
@@ -242,9 +251,9 @@ public class IslandCommandHandler implements CommandExecutor {
 			
 			Invite invite = new Invite(worldType, InviteType.ISLAND_ADD_MEMBER, sender.getUniqueId(), recipientId);
 			plugin.getInviteManager().add(invite);
-			sender.sendMessage(String.format(plugin.getMessage("member-invite-sent-sender"), playerName, (int) (plugin.getPartyDefinitions().getMemberInviteExpire() / 1000)));
+			sender.sendMessage(String.format(plugin.getMessage("member-invite-sent-sender"), playerName, (int) (plugin.getPartyDefinitions().getMemberInviteExpire() / EmberIsles.MILLISECONDS_PER_SECOND)));
 			recipient.sendMessage(String.format(plugin.getMessage("member-invite-sent-recipient"), sender.getName(), sender.getName(),
-					(int) (plugin.getPartyDefinitions().getMemberInviteExpire() / 1000)));
+					(int) (plugin.getPartyDefinitions().getMemberInviteExpire() / EmberIsles.MILLISECONDS_PER_SECOND)));
 			return;
 		} else
 
@@ -329,10 +338,9 @@ public class IslandCommandHandler implements CommandExecutor {
 			
 			Invite invite = new Invite(worldType, InviteType.ISLAND_ADD_HELPER, sender.getUniqueId(), recipientId, helperDurationMs);
 			plugin.getInviteManager().add(invite);
-			sender.sendMessage(String.format(plugin.getMessage("helper-invite-sent-sender"), playerName, (int) (plugin.getPartyDefinitions().getHelperInviteExpire() / 1000)));
-			recipient.sendMessage(String.format(plugin.getMessage("helper-invite-sent-recipient"), sender.getName(), (int) (helperDurationMs / 6000), sender.getName(),
-					(int) (plugin.getPartyDefinitions().getHelperInviteExpire() / 1000)));
-			
+			sender.sendMessage(String.format(plugin.getMessage("helper-invite-sent-sender"), playerName, (int) (plugin.getPartyDefinitions().getHelperInviteExpire() / EmberIsles.MILLISECONDS_PER_SECOND)));
+			recipient.sendMessage(String.format(plugin.getMessage("helper-invite-sent-recipient"), sender.getName(), (int) (helperDurationMs / EmberIsles.MILLISECONDS_PER_MINUTE), sender.getName(),
+					(int) (plugin.getPartyDefinitions().getHelperInviteExpire() / EmberIsles.MILLISECONDS_PER_SECOND)));
 			return;
 		} else
 		

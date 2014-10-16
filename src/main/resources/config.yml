@@ -274,3 +274,6 @@ messages:
   helper-remove-recipient: "&a%s has removed you as helper from their island."
   helper-invite-sent-recipient: "&aYou have received an invite to join as helper on %s island for %d minutes. To accept the invite do &6/island accept %s&a. The invite will expire in %d seconds."
   helper-invite-sent-sender: "&aHelper invite sent to %s. It will expire in %d seconds."
+  error-already-helper-recipient: "&cYou were already a helper on %s island."
+  helper-add-sender: "&2%s has accepted your invite and is now a helper on your island."
+  helper-add-recipient: "&2You are now added as helper to %s island."
