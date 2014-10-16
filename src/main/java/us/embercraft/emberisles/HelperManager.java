@@ -8,7 +8,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
 import us.embercraft.emberisles.datatypes.Helper;
+import us.embercraft.emberisles.datatypes.Island;
 import us.embercraft.emberisles.datatypes.IslandLookupKey;
 import us.embercraft.emberisles.datatypes.WorldType;
 
@@ -32,9 +36,33 @@ public class HelperManager {
 		while (iter.hasNext()) {
 			Helper helper = iter.next();
 			if (helper.getExpireTimestamp() <= currentTime) {
+				notifyExpire(helper);
 				iter.remove();
 				removeFromCache(helper);
 			}
+		}
+	}
+	
+	/**
+	 * Send expiration messages to island owner and helper when their time as helper is up.
+	 * @param helper Helper that has their time up
+	 */
+	private void notifyExpire(final Helper helper) {
+		final Island island = EmberIsles.getInstance().getWorldManager().getIslandAtLoc(helper.getWorldType(), helper.getIslandKey().getGridX(), helper.getIslandKey().getGridZ());
+		// Safety check against programming bugs, data corruption etc since island can't be null here for valid helper data
+		if (island == null) {
+			return;
+		}
+		final Player recipient = Bukkit.getPlayer(helper.getPlayerId());
+		final Player sender = Bukkit.getPlayer(island.getOwner());
+		if (recipient == null || sender == null) {
+			return;
+		}
+		if (sender.isOnline()) {
+			sender.sendMessage(String.format(EmberIsles.getInstance().getMessage("helper-expire-sender"), recipient.getName()));
+		}
+		if (recipient.isOnline()) {
+			recipient.sendMessage(String.format(EmberIsles.getInstance().getMessage("helper-expire-recipient"), sender.getName()));
 		}
 	}
 	

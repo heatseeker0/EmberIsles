@@ -277,3 +277,7 @@ messages:
   error-already-helper-recipient: "&cYou were already a helper on %s island."
   helper-add-sender: "&2%s has accepted your invite and is now a helper on your island."
   helper-add-recipient: "&2You are now added as helper to %s island."
+  helper-expire-sender: "&cHelper time is up. %s has been removed as helper from your island."
+  helper-expire-recipient: "&cHelper time is up. You have been removed as helper from %s island."
+  invite-expire-sender: "&6Your invite to %s has expired."
+  invite-expire-recipient: "&6%s invite to you has expired and can no longer be accepted."

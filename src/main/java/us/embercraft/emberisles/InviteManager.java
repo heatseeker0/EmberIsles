@@ -7,6 +7,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
 import us.embercraft.emberisles.datatypes.Invite;
 import us.embercraft.emberisles.datatypes.InviteType;
 import us.embercraft.emberisles.datatypes.WorldType;
@@ -40,9 +43,28 @@ public class InviteManager {
 		while (iter.hasNext()) {
 			Invite invite = iter.next();
 			if (invite.isExpired(currentTime)) {
+				notifyExpire(invite);
 				iter.remove();
 				dirtyFlag = true;
 			}
+		}
+	}
+	
+	/**
+	 * Notify the sender and receiver of an invite that it has just expired.
+	 * @param invite Expired invite
+	 */
+	private void notifyExpire(final Invite invite) {
+		final Player recipient = Bukkit.getPlayer(invite.getRecipient());
+		final Player sender = Bukkit.getPlayer(invite.getSender());
+		if (sender == null || recipient == null) {
+			return;
+		}
+		if (sender.isOnline()) {
+			sender.sendMessage(String.format(EmberIsles.getInstance().getMessage("invite-expire-sender"), recipient.getName()));
+		}
+		if (recipient.isOnline()) {
+			recipient.sendMessage(String.format(EmberIsles.getInstance().getMessage("invite-expire-recipient"), sender.getName()));
 		}
 	}
 	
