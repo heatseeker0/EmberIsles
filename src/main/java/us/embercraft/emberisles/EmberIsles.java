@@ -73,10 +73,16 @@ public class EmberIsles extends JavaPlugin {
 		}
 	}
 	
-	public class CleanupTicker implements Runnable {
+	public class InviteCleanupTicker implements Runnable {
 		@Override
 		public void run() {
 			getInviteManager().inviteExpirerTick();
+		}
+	}
+	
+	public class HelperCleanupTicker implements Runnable {
+		@Override
+		public void run() {
 			getHelperManager().helpersExpirerTick();
 		}
 	}
@@ -162,9 +168,13 @@ public class EmberIsles extends JavaPlugin {
 		getCommand("islandev").setExecutor(new IslandevCommandHandler(this));
 		
 		/*
-		 * Running the cleanup ticker every 2 seconds is good enough granularity.
+		 * Invite cleanup ticker granularity: 3 seconds.
 		 */
-		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new CleanupTicker() , 40L, 40L);
+		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new InviteCleanupTicker(), 60L, 60L);
+		/*
+		 * Helper cleanup ticker granularity: 7 seconds.
+		 */
+		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new HelperCleanupTicker(), 140L, 140L);
 	}
 	
 	@Override
