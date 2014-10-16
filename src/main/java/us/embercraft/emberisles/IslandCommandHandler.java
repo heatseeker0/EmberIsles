@@ -305,6 +305,12 @@ public class IslandCommandHandler implements CommandExecutor {
 		}
 		
 		if (cmd.equalsIgnoreCase("add")) {
+			// World settings don't allow parties
+			if (!plugin.getWorldManager().getDefaultWorldSettings(worldType).getAllowHelpers()) {
+				sender.sendMessage(plugin.getMessage("error-world-nohelpers"));
+				return;
+			}
+			
 			long helperDurationMs = plugin.getPartyDefinitions().getHelperDefaultDuration();
 			if (helperDuration != null) {
 				try {

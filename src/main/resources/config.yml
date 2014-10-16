@@ -281,3 +281,4 @@ messages:
   helper-expire-recipient: "&cHelper time is up. You have been removed as helper from %s island."
   invite-expire-sender: "&6Your invite to %s has expired."
   invite-expire-recipient: "&6%s invite to you has expired and can no longer be accepted."
+  error-world-nohelpers: "&cThis world doesn't allow helpers."
