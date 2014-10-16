@@ -9,6 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
+import us.embercraft.emberisles.datatypes.Helper;
 import us.embercraft.emberisles.datatypes.Invite;
 import us.embercraft.emberisles.datatypes.InviteType;
 import us.embercraft.emberisles.datatypes.Island;
@@ -62,12 +63,25 @@ public class IslandCommandHandler implements CommandExecutor {
 						// /island member <add | remove> <world type> <player name>
 						cmdMemberManagement(player, split[1], split[2], split[3]);
 						return true;
+					case "helper":
+						// /island helper <add | remove> <world type> <player name> [helper expire time]
+						cmdHelperManagement(player, split[1], split[2], split[3], null);
+						return true;
+				}
+				break;
+				
+			case 5:
+				switch(split[0].toLowerCase()) {
+					case "helper":
+						// /island helper <add | remove> <world type> <player name> [helper expire time]
+						cmdHelperManagement(player, split[1], split[2], split[3], split[4]);
+						return true;
 				}
 				break;
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Teleport a player to her island home in specified world.
 	 * @param sender Player to teleport
@@ -252,6 +266,94 @@ public class IslandCommandHandler implements CommandExecutor {
 		
 		// Not add or remove, it's an error. Print short help on /island member
 		sender.sendMessage(plugin.getMessage("island-member-help"));
+	}
+	
+	/**
+	 * Add or remove island helpers.
+	 * @param sender Island owner
+	 * @param cmd Command (add or remove)
+	 * @param worldTypeName World type for this action
+	 * @param playerName Helper name to add or remove
+	 * @param helperDuration Time this helper is to be added in MINUTES (null for remove operations or to use default config specified time)
+	 */
+	private void cmdHelperManagement(Player sender, String cmd, String worldTypeName, String playerName, String helperDuration) {
+		WorldType worldType = CommandHandlerHelpers.worldNameToType(worldTypeName);
+		if (worldType == null) {
+			sender.sendMessage(String.format(plugin.getMessage("error-invalid-world-type"), worldTypeName.toLowerCase()));
+			return;
+		}
+		// Sender owns an island?
+		Island island = plugin.getWorldManager().getPlayerIsland(worldType, sender.getUniqueId());
+		if (island == null || !island.getOwner().equals(sender.getUniqueId())) {
+			sender.sendMessage(plugin.getMessage("error-not-island-owner"));
+			return;
+		}
+		
+		UUID recipientId = plugin.getPlayerManager().getIdByName(playerName);
+		if (recipientId == null) {
+			sender.sendMessage(plugin.getMessage("error-player-not-found"));
+			return;
+		}
+		
+		if (cmd.equalsIgnoreCase("add")) {
+			long helperDurationMs = plugin.getPartyDefinitions().getHelperDefaultDuration();
+			if (helperDuration != null) {
+				try {
+					//TODO: Maybe in future allow input string flexibility such as 1h30m. Minor priority since most players will use GUI predefined values.
+					helperDurationMs = Integer.parseInt(helperDuration) * EmberIsles.MILLISECONDS_PER_MINUTE;
+				} catch (NumberFormatException e) {
+					helperDurationMs = plugin.getPartyDefinitions().getHelperDefaultDuration();
+				}
+			}
+			// Recipient is already a helper on sender island
+			if (plugin.getHelperManager().isHelping(worldType, island.getLookupKey(), recipientId)) {
+				sender.sendMessage(String.format(plugin.getMessage("error-already-helper"), playerName));
+				return;
+			}
+			
+			/*
+			 * To simplify things for the players, you can't simultaneously send an invite for say both your normal
+			 * and challenge world to the same player. She has to accept your first invite (e.g. for the normal 
+			 * world) before you can send the other one for the challenge world. Same for helper and member.
+			 */
+			if (plugin.getInviteManager().hasInvite(sender.getUniqueId(), recipientId)) {
+				sender.sendMessage(String.format(plugin.getMessage("error-already-pending"), playerName));
+				return;
+			}
+			// Is recipient online? (won't add offline players since they can't accept invites)
+			final Player recipient = Bukkit.getPlayer(recipientId);
+			if (recipient == null || !recipient.isOnline()) {
+				sender.sendMessage(String.format(plugin.getMessage("error-player-not-online"), playerName));
+				return;
+			}
+			
+			Invite invite = new Invite(worldType, InviteType.ISLAND_ADD_HELPER, sender.getUniqueId(), recipientId, helperDurationMs);
+			plugin.getInviteManager().add(invite);
+			sender.sendMessage(String.format(plugin.getMessage("helper-invite-sent-sender"), playerName, (int) (plugin.getPartyDefinitions().getHelperInviteExpire() / 1000)));
+			recipient.sendMessage(String.format(plugin.getMessage("helper-invite-sent-recipient"), sender.getName(), (int) (helperDurationMs / 6000), sender.getName(),
+					(int) (plugin.getPartyDefinitions().getHelperInviteExpire() / 1000)));
+			
+			return;
+		} else
+		
+		if (cmd.equalsIgnoreCase("remove")) {
+			if (!plugin.getHelperManager().isHelping(worldType, island.getLookupKey(), recipientId)) {
+				sender.sendMessage(String.format(plugin.getMessage("error-not-helper"), playerName));
+				return;
+			}
+			
+			plugin.getHelperManager().remove(new Helper(worldType, island.getLookupKey(), recipientId, 0));
+			sender.sendMessage(String.format(plugin.getMessage("helper-remove-sender"), playerName));
+			
+			final Player recipient = Bukkit.getPlayer(recipientId);
+			if (recipient != null && recipient.isOnline()) {
+				recipient.sendMessage(String.format(plugin.getMessage("helper-remove-recipient"), sender.getName()));
+			}
+			return;
+		}
+		
+		// Not add or remove, it's an error. Print short help on /island member
+		sender.sendMessage(plugin.getMessage("island-helper-help"));
 	}
 
 	EmberIsles plugin;

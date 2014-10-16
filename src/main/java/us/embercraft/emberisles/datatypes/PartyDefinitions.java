@@ -72,7 +72,24 @@ public class PartyDefinitions {
 		return result;
 	}
 	
+	/**
+	 * How long to add a helper to an island.
+	 * @return Helper duration time in milliseconds
+	 */
+	public long getHelperDefaultDuration() {
+		return helperDefaultDuration;
+	}
+
+	/**
+	 * Sets for how long to add a helper to an island.
+	 * helperDefaultDuration Helper duration time in milliseconds
+	 */
+	public void setHelperDefaultDuration(long helperDefaultDuration) {
+		this.helperDefaultDuration = helperDefaultDuration;
+	}
+
 	private Map<String, Integer> partyLimits = new HashMap<>();
 	private long memberInviteExpire;
 	private long helperInviteExpire;
+	private long helperDefaultDuration;
 }

@@ -219,6 +219,7 @@ public class EmberIsles extends JavaPlugin {
 		 */
 		partyDefinitions.setMemberInviteExpire(config.getInt("party-settings.member-invite-expire", 60) * MILLISECONDS_PER_SECOND);
 		partyDefinitions.setHelperInviteExpire(config.getInt("party-settings.helper-invite-expire", 60) * MILLISECONDS_PER_SECOND);
+		partyDefinitions.setHelperDefaultDuration(config.getInt("party-settings.helper-default-duration", 60) * MILLISECONDS_PER_MINUTE);
 		for (String key : config.getConfigurationSection("party-settings.ranks").getKeys(false)) {
 			partyDefinitions.addPartyRank(config.getString(String.format("party-settings.ranks.%s.permission", key)), 
 					config.getInt(String.format("party-settings.ranks.%s.party-limit", key)));

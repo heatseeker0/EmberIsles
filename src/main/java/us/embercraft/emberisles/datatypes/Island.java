@@ -193,6 +193,13 @@ public class Island implements Serializable {
     	return bannedPlayers.add(player);
     }
     
+    public IslandLookupKey getLookupKey() {
+    	if (lookupKey == null) {
+    		lookupKey = new IslandLookupKey(this);
+    	}
+    	return lookupKey;
+    }
+    
 	@Override
 	public boolean equals(Object o) {
 		if (o == null || !(o instanceof Island))
@@ -214,6 +221,7 @@ public class Island implements Serializable {
 	}
 	
 	private transient int hashCode = 0;
+	private transient IslandLookupKey lookupKey = null;
 	
     private final int islandGridX;
     private final int islandGridZ;

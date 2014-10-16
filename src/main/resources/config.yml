@@ -128,9 +128,11 @@ schematics:
       - "&9http://www.embercraft.us"
 
 party-settings:
-  # Invite expire times are in seconds
+  # Invite expire times are in SECONDS
   member-invite-expire: 60
   helper-invite-expire: 60
+  # Helper default duration if none is specified when players add a helper. This is in MINUTES
+  helper-default-duration: 60
   ranks:
     default-rank:
       permission: "emberisles.use"
@@ -265,3 +267,10 @@ messages:
   member-add-recipient: "&2You are now added to %s island."
   error-no-island: "&cYou don't have an island in the %s world."
   teleported-home: "&2You have been teleported to the island spawn."
+  error-already-helper: "&c%s is already a helper on your island."
+  island-helper-help: "&cUsage: /island helper <add | remove> <normal | challenge | hardcore> <player name> [add duration in minutes]"
+  error-not-helper: "&c%s is not a helper on your island."
+  helper-remove-sender: "&2You have removed %s as helper from your island."
+  helper-remove-recipient: "&a%s has removed you as helper from their island."
+  helper-invite-sent-recipient: "&aYou have received an invite to join as helper on %s island for %d minutes. To accept the invite do &6/island accept %s&a. The invite will expire in %d seconds."
+  helper-invite-sent-sender: "&aHelper invite sent to %s. It will expire in %d seconds."
