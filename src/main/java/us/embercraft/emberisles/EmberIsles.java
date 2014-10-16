@@ -574,6 +574,12 @@ public class EmberIsles extends JavaPlugin {
 	public void onPlayerJoin(Player player) {
 		getPlayerManager().addPlayer(player.getUniqueId(), player.getName());
 		/*
+		 * If player is admin and server spawn isn't set, prompt to do so.
+		 */
+		if (serverSpawn == null && player.hasPermission("emberisles.admin")) {
+			player.sendMessage(getMessage("server-spawn-notset"));
+		}
+		/*
 		 * Update last island activity for all worlds for this player.
 		 */
 		final long currentTime = System.currentTimeMillis();
