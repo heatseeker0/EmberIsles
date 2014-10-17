@@ -77,6 +77,10 @@ public class IslandCommandHandler implements CommandExecutor {
                         // /island unlock <world type> - Unlock their island
                         cmdLockUnlock(player, split[1], false);
                         return true;
+                    case "ban":
+                        // /island ban <world type> - Print the list of blacklisted players. All members can see this.
+                        cmdBanList(player, split[1]);
+                        return true;
                 }
                 break;
             case 3:
@@ -88,6 +92,10 @@ public class IslandCommandHandler implements CommandExecutor {
                     case "warp":
                         // /island warp <world type> <player name>
                         cmdWarp(player, split[1], split[2]);
+                        return true;
+                    case "ban":
+                        // /island ban <world type> <player name>
+                        cmdBan(player, split[1], split[2]);
                         return true;
                 }
                 break;
@@ -113,6 +121,100 @@ public class IslandCommandHandler implements CommandExecutor {
                 break;
         }
         return false;
+    }
+
+    /**
+     * Ban or unban players from entering an island by any means (fly, warp, enderpearl, teleport, etc.).
+     * Doesn't allow banning members or helpers.
+     * 
+     * @param sender Island owner
+     * @param worldTypeName World type
+     * @param target Player to ban or unban
+     */
+    private void cmdBan(Player sender, String worldTypeName, String target) {
+        // Valid world type?
+        WorldType worldType = CommandHandlerHelpers.worldNameToType(worldTypeName);
+        if (worldType == null) {
+            sender.sendMessage(String.format(plugin.getMessage("error-invalid-world-type"), worldTypeName.toLowerCase()));
+            return;
+        }
+        // Does the sender belong to an island and is that island owner?
+        Island island = plugin.getWorldManager().getPlayerIsland(worldType, sender.getUniqueId());
+        if (island == null || !island.getOwner().equals(sender.getUniqueId())) {
+            sender.sendMessage(plugin.getMessage("error-not-island-owner"));
+            return;
+        }
+
+        UUID targetId = plugin.getPlayerManager().getIdByName(target);
+        if (targetId == null) {
+            sender.sendMessage(plugin.getMessage("error-player-not-found"));
+            return;
+        }
+
+        // Don't allow banning helpers or members
+        if (!island.isBanned(targetId) && island.isMember(targetId)) {
+            sender.sendMessage(String.format(plugin.getMessage("error-cant-ban-members"), target));
+            return;
+        }
+        if (!island.isBanned(targetId) && plugin.getHelperManager().isHelping(worldType, island.getLookupKey(), targetId)) {
+            sender.sendMessage(String.format(plugin.getMessage("error-cant-ban-helpers"), target));
+            return;
+        }
+
+        Player targetPlayer = Bukkit.getPlayer(targetId);
+
+        if (island.isBanned(targetId)) {
+            plugin.getWorldManager().unbanPlayer(worldType, island, targetId);
+            sender.sendMessage(String.format(plugin.getMessage("player-unbanned-sender"), target));
+            if (targetPlayer != null && targetPlayer.isOnline()) {
+                targetPlayer.sendMessage(String.format(plugin.getMessage("player-unbanned-recipient"), sender.getName()));
+            }
+        } else {
+            plugin.getWorldManager().banPlayer(worldType, island, targetId);
+            sender.sendMessage(String.format(plugin.getMessage("player-banned-sender"), target));
+            if (targetPlayer != null && targetPlayer.isOnline()) {
+                targetPlayer.sendMessage(String.format(plugin.getMessage("player-banned-recipient"), sender.getName()));
+                // If banned player is online and inside this island space, send her to server spawn
+                if (plugin.getServerSpawn() != null && plugin.getWorldManager().isLocationInIsland(worldType, island, targetPlayer.getLocation())) {
+                    CommandHandlerHelpers.delayedPlayerTeleport(targetPlayer, plugin.getServerSpawn());
+                    targetPlayer.sendMessage(plugin.getMessage("you-were-expelled"));
+                }
+            }
+        }
+    }
+
+    /**
+     * Prints the list of blacklisted players. Any member can run this command.
+     * 
+     * @param sender Island member
+     * @param worldTypeName World type
+     */
+    private void cmdBanList(Player sender, String worldTypeName) {
+        // Valid world type?
+        WorldType worldType = CommandHandlerHelpers.worldNameToType(worldTypeName);
+        if (worldType == null) {
+            sender.sendMessage(String.format(plugin.getMessage("error-invalid-world-type"), worldTypeName.toLowerCase()));
+            return;
+        }
+        // Does the sender belong to an island?
+        Island island = plugin.getWorldManager().getPlayerIsland(worldType, sender.getUniqueId());
+        if (island == null || !island.getOwner().equals(sender.getUniqueId())) {
+            sender.sendMessage(String.format(plugin.getMessage("error-no-island"), worldType.getConfigKey()));
+            return;
+        }
+        Set<UUID> bannedPlayers = island.getBannedPlayers();
+        if (bannedPlayers.isEmpty()) {
+            sender.sendMessage(plugin.getMessage("island-blacklist-empty"));
+            return;
+        }
+        sender.sendMessage(plugin.getMessage("island-blacklist-header"));
+        StringBuilder sb = new StringBuilder();
+        for (UUID uuid : bannedPlayers) {
+            if (sb.length() > 0)
+                sb.append(", ");
+            sb.append(plugin.getPlayerManager().getPlayerName(uuid));
+        }
+        sender.sendMessage(String.format(plugin.getMessage("island-blacklist-entry"), sb.toString()));
     }
 
     /**

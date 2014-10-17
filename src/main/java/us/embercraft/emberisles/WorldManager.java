@@ -594,6 +594,13 @@ public class WorldManager {
         return island.isWarpEnabled();
     }
 
+    /**
+     * Togges the island lock on or off. Returns the new state of the lock.
+     * 
+     * @param type World type
+     * @param island Island to lock or unlock
+     * @return New lock state after this command is performed
+     */
     public boolean toggleIslandLock(WorldType type, Island island) {
         if (type == null || island == null)
             return false;
@@ -604,6 +611,39 @@ public class WorldManager {
         }
         setDirty(type);
         return island.isLocked();
+    }
+
+    /**
+     * Bans specified player from entering the island by any means. Returns true if the player was banned
+     * and false if it was already banned.
+     * 
+     * @param type World type
+     * @param island Island to work with
+     * @param playerId Player Id to ban
+     * @return True if the player was banned; false if it was already banned
+     */
+    public boolean banPlayer(WorldType type, Island island, UUID playerId) {
+        boolean result = island.banPlayer(playerId);
+        if (result) {
+            setDirty(type);
+        }
+        return result;
+    }
+
+    /**
+     * Unbans specified player from the island.
+     * 
+     * @param type World type
+     * @param island Island to work with
+     * @param playerId Player Id to unban
+     * @return True if the player was unbanned; false if it wasn't banned to begin with
+     */
+    public boolean unbanPlayer(WorldType type, Island island, UUID playerId) {
+        boolean result = island.unbanPlayer(playerId);
+        if (result) {
+            setDirty(type);
+        }
+        return result;
     }
 
     private static WorldManager instance = null;

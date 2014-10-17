@@ -201,12 +201,24 @@ public class Island implements Serializable {
         return bannedPlayers;
     }
 
+    /**
+     * Bans specified player.
+     * 
+     * @param player Player Id to ban
+     * @return True if player was banned, false if it was already banned
+     */
     public boolean banPlayer(UUID player) {
-        return bannedPlayers.remove(player);
+        return bannedPlayers.add(player);
     }
 
+    /**
+     * Unbans specified player.
+     * 
+     * @param player Player Id to unban
+     * @return True if player was unbanned, false if player was already unbanned
+     */
     public boolean unbanPlayer(UUID player) {
-        return bannedPlayers.add(player);
+        return bannedPlayers.remove(player);
     }
 
     public IslandLookupKey getLookupKey() {
