@@ -292,3 +292,6 @@ messages:
   error-warp-closed: "&c%s island warp is closed."
   error-island-locked: "&c%s island is locked."
   error-you-banned: "&cYou are banned from %s island."
+  error-not-on-island: "&cYou have to be on your island to use this command."
+  error-you-must-be-owner: "&cYou are not this island owner."
+  warp-set: "&2Island warp set."

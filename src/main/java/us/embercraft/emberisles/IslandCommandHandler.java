@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -42,6 +43,10 @@ public class IslandCommandHandler implements CommandExecutor {
                          * then GUI driven creation
                          */
                         cmdIslandCreate(player);
+                        return true;
+                    case "setwarp":
+                        // /island setwarp - sets the island warp for the island the player is on, provided it is the island owner
+                        cmdSetWarp(player);
                         return true;
                 }
                 break;
@@ -96,6 +101,27 @@ public class IslandCommandHandler implements CommandExecutor {
                 break;
         }
         return false;
+    }
+
+    /**
+     * Sets the island warp at sender location, provided the sender is the island owner and is on her island.
+     * 
+     * @param sender Island owner
+     */
+    private void cmdSetWarp(Player sender) {
+        final Location senderLoc = sender.getLocation();
+        Island island = plugin.getWorldManager().getIslandAtLoc(senderLoc);
+        if (island == null) {
+            sender.sendMessage(plugin.getMessage("error-not-on-island"));
+            return;
+        }
+        if (!island.getOwner().equals(sender.getUniqueId())) {
+            sender.sendMessage(plugin.getMessage("error-you-must-be-owner"));
+            return;
+        }
+        plugin.getWorldManager().setIslandWarp(plugin.getWorldManager().bukkitWorldToWorldType(senderLoc.getWorld()), island, senderLoc);
+        sender.sendMessage(plugin.getMessage("warp-set"));
+        // TODO: Maybe inform the owner when their warp is set but not enabled?
     }
 
     /**

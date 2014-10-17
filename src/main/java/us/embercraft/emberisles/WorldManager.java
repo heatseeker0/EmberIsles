@@ -249,10 +249,22 @@ public class WorldManager {
      * @return Island owned by players or null if there was none
      */
     public Island getIslandAtLoc(final WorldType type, final int gridX, final int gridZ) {
-        IslandLookupKey key = new IslandLookupKey(gridX, gridZ);
+        return getIslandAtLoc(type, new IslandLookupKey(gridX, gridZ));
+    }
+
+    /**
+     * Returns the player owned island at specified lookup key or null if there is none.
+     * 
+     * @param type World type
+     * @param key Lookup key
+     * @return Island owned by players or null if there is none
+     */
+    public Island getIslandAtLoc(final WorldType type, final IslandLookupKey key) {
+        if (type == null || key == null)
+            return null;
         if (islandLookupCache.get(type).containsKey(key)) {
             for (Island island : islandLookupCache.get(type).get(key)) {
-                if (island.getIslandGridX() == gridX && island.getIslandGridZ() == gridZ) {
+                if (island.getIslandGridX() == key.getGridX() && island.getIslandGridZ() == key.getGridZ()) {
                     return island;
                 }
             }
@@ -495,6 +507,21 @@ public class WorldManager {
     }
 
     /**
+     * Returns the island at given Bukkit world coordinates. Returns null if there's no island at that position.
+     * 
+     * @param loc Location to return the island for
+     * @return Island if there's one or null
+     */
+    public Island getIslandAtLoc(final Location loc) {
+        // TODO: We should cache return values when we'll implement event handlers
+        if (loc == null)
+            return null;
+        WorldType type = bukkitWorldToWorldType(loc.getWorld());
+        IslandLookupKey key = worldToGridCoord(type, loc);
+        return getIslandAtLoc(type, key);
+    }
+
+    /**
      * Retrieves the WorldEdit API for the specified world type.
      * 
      * @param type World type
@@ -533,6 +560,18 @@ public class WorldManager {
 
         island.addMember(recipientId);
         playerLookupCache.get(type).put(recipientId, island);
+        setDirty(type);
+    }
+
+    /**
+     * Sets the given island warp at specified location.
+     * 
+     * @param type World type
+     * @param island Island to set the warp for
+     * @param loc Location of the new warp
+     */
+    public void setIslandWarp(WorldType type, Island island, Location loc) {
+        island.setWarp(loc);
         setDirty(type);
     }
 
