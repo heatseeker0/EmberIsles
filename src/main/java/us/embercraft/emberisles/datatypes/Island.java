@@ -78,16 +78,27 @@ public class Island implements Serializable {
         return warp;
     }
 
+    /**
+     * Returns true if the island warp is enabled and set (not null).
+     * 
+     * @return
+     */
     public boolean isWarpEnabled() {
         return warp != null && warpEnabled;
     }
 
+    /**
+     * Enables the island warp if one is already set (not null). Does nothing if the warp is null.
+     */
     public void enableWarp() {
         if (warp != null) {
             warpEnabled = true;
         }
     }
 
+    /**
+     * Disables the island warp.
+     */
     public void disableWarp() {
         warpEnabled = false;
     }

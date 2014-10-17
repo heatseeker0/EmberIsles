@@ -295,3 +295,6 @@ messages:
   error-not-on-island: "&cYou have to be on your island to use this command."
   error-you-must-be-owner: "&cYou are not this island owner."
   warp-set: "&2Island warp set."
+  warp-toggle-on: "&2Your island warp is now &6ENABLED"
+  warp-toggle-off: "&2Your island warp is now &6DISABLED"
+  error-warp-not-set: "&cYour island has no warp set. Do &6/is setwarp &c to set the warp before you can enable it."

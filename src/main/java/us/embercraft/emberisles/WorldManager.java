@@ -575,6 +575,25 @@ public class WorldManager {
         setDirty(type);
     }
 
+    /**
+     * Toggles the island warp on or off. Returns the new state of the warp.
+     * 
+     * @param type World type
+     * @param island Island to toggle the warp for
+     * @return Warp state after the toggle
+     */
+    public boolean toggleIslandWarp(WorldType type, Island island) {
+        if (type == null || island == null)
+            return false;
+        if (island.isWarpEnabled()) {
+            island.disableWarp();
+        } else {
+            island.enableWarp();
+        }
+        setDirty(type);
+        return island.isWarpEnabled();
+    }
+
     private static WorldManager instance = null;
 
     private final Map<WorldType, Map<IslandLookupKey, Set<Island>>> islandLookupCache = new HashMap<>();

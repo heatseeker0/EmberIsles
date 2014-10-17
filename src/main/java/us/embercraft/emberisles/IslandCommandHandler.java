@@ -65,6 +65,10 @@ public class IslandCommandHandler implements CommandExecutor {
                         // emberisles.admin.noexpel permission node
                         cmdExpel(player, split[1], null);
                         return true;
+                    case "togglewarp":
+                        // /island togglewarp <world type> - Toggles their island warp on / off for specified world
+                        cmdToggleWarp(player, split[1]);
+                        return true;
                 }
                 break;
             case 3:
@@ -101,6 +105,37 @@ public class IslandCommandHandler implements CommandExecutor {
                 break;
         }
         return false;
+    }
+
+    /**
+     * Toggles the island warp on or off provided the sender is island owner.
+     * 
+     * @param sender Island owner
+     * @param worldTypeName World type to toggle the warp for
+     */
+    private void cmdToggleWarp(Player sender, String worldTypeName) {
+        // Valid world type?
+        WorldType worldType = CommandHandlerHelpers.worldNameToType(worldTypeName);
+        if (worldType == null) {
+            sender.sendMessage(String.format(plugin.getMessage("error-invalid-world-type"), worldTypeName.toLowerCase()));
+            return;
+        }
+        // Does the sender belong to an island and is that island owner?
+        Island island = plugin.getWorldManager().getPlayerIsland(worldType, sender.getUniqueId());
+        if (island == null || !island.getOwner().equals(sender.getUniqueId())) {
+            sender.sendMessage(plugin.getMessage("error-not-island-owner"));
+            return;
+        }
+        // No warp set? Nothing to toggle.
+        if (island.getWarp() == null) {
+            sender.sendMessage(plugin.getMessage("error-warp-not-set"));
+            return;
+        }
+        if (plugin.getWorldManager().toggleIslandWarp(worldType, island)) {
+            sender.sendMessage(plugin.getMessage("warp-toggle-on"));
+        } else {
+            sender.sendMessage(plugin.getMessage("warp-toggle-off"));
+        }
     }
 
     /**
