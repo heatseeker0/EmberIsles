@@ -104,11 +104,11 @@ public class Island implements Serializable {
     }
 
     /**
-     * Returns the status of the island lock. See {@link #lockIsland()} and {@link #unlockIsland()}.
+     * Returns the status of the island lock. See {@link #lock()} and {@link #unlock()}.
      * 
      * @return True if the island is locked
      */
-    public boolean isIslandLocked() {
+    public boolean isLocked() {
         return islandLocked;
     }
 
@@ -116,7 +116,7 @@ public class Island implements Serializable {
      * Lock the island preventing anyone except the island owner, members and
      * helpers from entering the island space by any means.
      */
-    public void lockIsland() {
+    public void lock() {
         islandLocked = true;
     }
 
@@ -124,7 +124,7 @@ public class Island implements Serializable {
      * Unlocks the island allowing anyone (including non-members) to enter the
      * island space.
      */
-    public void unlockIsland() {
+    public void unlock() {
         islandLocked = false;
     }
 

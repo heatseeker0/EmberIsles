@@ -298,3 +298,5 @@ messages:
   warp-toggle-on: "&2Your island warp is now &6ENABLED"
   warp-toggle-off: "&2Your island warp is now &6DISABLED"
   error-warp-not-set: "&cYour island has no warp set. Do &6/is setwarp &c to set the warp before you can enable it."
+  island-locked: "&2Your island is now &6LOCKED"
+  island-unlocked: "&2Your island is now &6UNLOCKED"

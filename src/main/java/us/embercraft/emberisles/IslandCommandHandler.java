@@ -69,6 +69,14 @@ public class IslandCommandHandler implements CommandExecutor {
                         // /island togglewarp <world type> - Toggles their island warp on / off for specified world
                         cmdToggleWarp(player, split[1]);
                         return true;
+                    case "lock":
+                        // /island lock <world type> - Locks their island so only members and helpers can enter it's space by any means
+                        cmdLockUnlock(player, split[1], true);
+                        return true;
+                    case "unlock":
+                        // /island unlock <world type> - Unlock their island
+                        cmdLockUnlock(player, split[1], false);
+                        return true;
                 }
                 break;
             case 3:
@@ -105,6 +113,42 @@ public class IslandCommandHandler implements CommandExecutor {
                 break;
         }
         return false;
+    }
+
+    /**
+     * Locks or unlocks the island. Nobody except members and helpers can enter a locked island space by any means.
+     * 
+     * @param sender Island owner
+     * @param worldTypeName World type
+     * @param isLock True to lock the island, false to unlock it
+     */
+    private void cmdLockUnlock(Player sender, String worldTypeName, boolean isLock) {
+        // Valid world type?
+        WorldType worldType = CommandHandlerHelpers.worldNameToType(worldTypeName);
+        if (worldType == null) {
+            sender.sendMessage(String.format(plugin.getMessage("error-invalid-world-type"), worldTypeName.toLowerCase()));
+            return;
+        }
+        // Does the sender belong to an island and is that island owner?
+        Island island = plugin.getWorldManager().getPlayerIsland(worldType, sender.getUniqueId());
+        if (island == null || !island.getOwner().equals(sender.getUniqueId())) {
+            sender.sendMessage(plugin.getMessage("error-not-island-owner"));
+            return;
+        }
+        // Do nothing if state doesn't change to prevent unneeded island DB saves.
+        if (isLock && island.isLocked()) {
+            sender.sendMessage(plugin.getMessage("island-locked"));
+            return;
+        }
+        if (!isLock && !island.isLocked()) {
+            sender.sendMessage(plugin.getMessage("island-unlocked"));
+            return;
+        }
+        if (plugin.getWorldManager().toggleIslandLock(worldType, island)) {
+            sender.sendMessage(plugin.getMessage("island-locked"));
+        } else {
+            sender.sendMessage(plugin.getMessage("island-unlocked"));
+        }
     }
 
     /**
@@ -191,7 +235,7 @@ public class IslandCommandHandler implements CommandExecutor {
             return;
         }
         // Is island locked to outsiders?
-        if (island.isIslandLocked() && !(island.isMember(sender.getUniqueId()) || plugin.getHelperManager().isHelping(worldType, island.getLookupKey(), sender.getUniqueId()))) {
+        if (island.isLocked() && !(island.isMember(sender.getUniqueId()) || plugin.getHelperManager().isHelping(worldType, island.getLookupKey(), sender.getUniqueId()))) {
             sender.sendMessage(String.format(plugin.getMessage("error-island-locked"), target));
             return;
         }

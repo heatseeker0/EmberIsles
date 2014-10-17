@@ -594,6 +594,18 @@ public class WorldManager {
         return island.isWarpEnabled();
     }
 
+    public boolean toggleIslandLock(WorldType type, Island island) {
+        if (type == null || island == null)
+            return false;
+        if (island.isLocked()) {
+            island.unlock();
+        } else {
+            island.lock();
+        }
+        setDirty(type);
+        return island.isLocked();
+    }
+
     private static WorldManager instance = null;
 
     private final Map<WorldType, Map<IslandLookupKey, Set<Island>>> islandLookupCache = new HashMap<>();
