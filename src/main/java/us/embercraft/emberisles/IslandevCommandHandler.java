@@ -84,8 +84,8 @@ public class IslandevCommandHandler implements CommandExecutor {
         final int minZ = cornerA.getBlockZ();
         final int maxZ = cornerB.getBlockZ();
         final World world = cornerA.getWorld();
-        for (int x = minX; x <= maxX; x += 8) {
-            for (int z = minZ; z <= maxZ; z += 8) {
+        for (int x = minX; x <= maxX; x += 16) {
+            for (int z = minZ; z <= maxZ; z += 16) {
                 world.regenerateChunk(x, z);
             }
         }
