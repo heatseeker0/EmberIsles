@@ -30,14 +30,10 @@ public class ConfirmCodeManager {
         }
     }
 
-    private ConfirmCodeManager() {
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(EmberIsles.getInstance(), new CodeExpirer(), 20L, 20L);
-    }
+    public ConfirmCodeManager(EmberIsles plugin) {
+        this.plugin = plugin;
 
-    public static ConfirmCodeManager getInstance() {
-        if (instance == null)
-            instance = new ConfirmCodeManager();
-        return instance;
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this.plugin, new CodeExpirer(), 20L, 20L);
     }
 
     /**
@@ -98,7 +94,7 @@ public class ConfirmCodeManager {
         return result;
     }
 
-    private static ConfirmCodeManager instance = null;
+    private EmberIsles plugin;
 
     private long codeExpireTime = 30 * EmberIsles.MILLISECONDS_PER_SECOND;
     private Map<Player, TimestampString> codes = new HashMap<>();

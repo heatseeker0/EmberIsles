@@ -149,6 +149,8 @@ public class EmberIsles extends JavaPlugin {
          */
         getGuiManager().initManager(this);
 
+        codeManager = new ConfirmCodeManager(this);
+
         saveDefaultConfig();
         applyConfig();
         loadServerSettings();
@@ -682,6 +684,10 @@ public class EmberIsles extends JavaPlugin {
         CommandHandlerHelpers.delayedPlayerTeleport(player, spawnLocation);
     }
 
+    public ConfirmCodeManager getConfirmCodeManager() {
+        return codeManager;
+    }
+
     /**
      * Returns the global server spawn location.
      * 
@@ -757,7 +763,7 @@ public class EmberIsles extends JavaPlugin {
     final static long MILLISECONDS_PER_SECOND = 1000L;
     private Map<UUID, FutureMenuCommand> futureCommands = new HashMap<>();
     private InviteManager inviteManager = new InviteManager();
-    private static ConfirmCodeManager codeManager = ConfirmCodeManager.getInstance();
+    private ConfirmCodeManager codeManager;
 
     /*
      * Config settings
