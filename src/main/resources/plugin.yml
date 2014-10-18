@@ -12,7 +12,7 @@ commands:
     aliases: [is,skyblock,sb]
     permission: emberisles.use
   islandev:
-    usage: /<command>
+    usage: /<command> [setserverspawn | islandinfo]
     description: Island management admin command
     permission: emberisles.admin
   challenges:

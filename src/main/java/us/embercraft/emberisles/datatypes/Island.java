@@ -247,6 +247,11 @@ public class Island implements Serializable {
         return String.format("[owner: %s, gridX: %s, gridZ: %s, schematic: %s]", EmberIsles.getInstance().getPlayerManager().getPlayerName(owner), islandGridX, islandGridZ);
     }
 
+    /**
+     * Gets the island corner A (upper left) in Bukkit world coordinates.
+     * 
+     * @return Island corner A (upper left) in Bukkit world coordinates.
+     */
     public Location getCornerA() {
         return cornerA;
     }
@@ -255,6 +260,11 @@ public class Island implements Serializable {
         this.cornerA = cornerA;
     }
 
+    /**
+     * Gets the island corner B (bottom right) in Bukkit world coordinates.
+     * 
+     * @return Island corner B (bottom right) in Bukkit world coordinates.
+     */
     public Location getCornerB() {
         return cornerB;
     }

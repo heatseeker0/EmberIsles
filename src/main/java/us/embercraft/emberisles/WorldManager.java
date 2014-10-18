@@ -159,6 +159,14 @@ public class WorldManager {
         dirtyFlag.put(type, false);
     }
 
+    /**
+     * Initializes the IslandLookupKey -> Island cache. Also initializes island cornerA and cornerB.
+     * 
+     * <p>Called internally by {@link #addIsland(WorldType, Island)} and {@link #addAllOccupied(WorldType, Collection)}.</p>
+     * 
+     * @param type World type
+     * @param island Island to add
+     */
     private void addIslandToLookupCache(final WorldType type, final Island island) {
         if (island == null)
             return;
@@ -167,6 +175,9 @@ public class WorldManager {
             islandLookupCache.get(type).put(key, new HashSet<Island>());
         }
         islandLookupCache.get(type).get(key).add(island);
+
+        island.setCornerA(gridToWorldCoordA(type, island.getIslandGridX(), island.getIslandGridZ()));
+        island.setCornerB(gridToWorldCoordB(type, island.getIslandGridX(), island.getIslandGridZ()));
     }
 
     private void removeIslandFromLookupCache(final WorldType type, final Island island) {
