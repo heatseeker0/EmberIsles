@@ -206,6 +206,7 @@ public class EmberIsles extends JavaPlugin {
         }
 
         worldGenerator = config.getString("world-generator", "CleanroomGenerator:.");
+        codeManager.setCodeExpireTime(config.getInt("codes-expire-time", 30));
 
         /*
          * Set up default island protection flags
@@ -756,6 +757,7 @@ public class EmberIsles extends JavaPlugin {
     final static long MILLISECONDS_PER_SECOND = 1000L;
     private Map<UUID, FutureMenuCommand> futureCommands = new HashMap<>();
     private InviteManager inviteManager = new InviteManager();
+    private static ConfirmCodeManager codeManager = ConfirmCodeManager.getInstance();
 
     /*
      * Config settings

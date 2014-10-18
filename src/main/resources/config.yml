@@ -5,6 +5,9 @@ helper-auto-save: 15
 # World/Islands data autosave time - in minutes, 0 to disable (NOT RECOMMENDED!)
 world-auto-save: 11
 
+# Clear / delete confirmation codes expire time in SECONDS
+codes-expire-time: 30
+
 # Caution should be exercised when modifying the world generator options
 world-generator: "CleanroomGenerator:."
 
@@ -309,3 +312,4 @@ messages:
   player-unbanned-recipient: "&2You are now unbanned from %s island."
   error-cant-ban-members: "&c%s is a member of your island. Can't ban island members."
   error-cant-ban-helpers: "&c%s is a helper on your island. Can't ban helpers."
+  confirm-code-expired: "&6Your confirmation code has expired."
