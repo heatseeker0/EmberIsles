@@ -14,6 +14,7 @@ import java.util.UUID;
 
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 
 import us.embercraft.emberisles.datatypes.Island;
 import us.embercraft.emberisles.datatypes.IslandLookupKey;
@@ -675,6 +676,232 @@ public class WorldManager {
             setDirty(type);
         }
         return result;
+    }
+
+    /**
+     * Returns true if specified player can build on the island at given location. Returns false if player
+     * is attempting to build on an island it has no permissions for or outside the island space (i.e. on the
+     * space between islands).
+     * 
+     * <p>It also returns true if location is not in a world managed by EmberIsles, letting other plugins deal with
+     * that world (i.e. Spawn world, minigame world, etc.).</p>
+     * 
+     * @param player Player to check
+     * @param location Location where player is trying to build
+     * @return True if player is allowed to build, false otherwise
+     */
+    public boolean canBuild(Player player, Location location) {
+        if (location == null)
+            return true;
+
+        // Not a world managed by this manager, don't touch this event.
+        WorldType worldType = bukkitWorldToWorldType(location.getWorld());
+        if (worldType == null)
+            return true;
+
+        Island island = getIslandAtLoc(location);
+        // We manage this world, location is not part of an island. Denied!
+        if (island == null) {
+            return false;
+        }
+
+        return island.getOwner().equals(player.getUniqueId()) ||
+                island.isMember(player.getUniqueId()) ||
+                EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId());
+    }
+
+    /**
+     * Returns true if specified player can use the utilities (anvils, enchanting tables, workbenches, beds, enderchests, furnaces)
+     * on the island at given location. Returns false if player is attempting to use on an island it has no permissions for or
+     * outside the island space (i.e. on the space between islands).
+     * 
+     * <p>It also returns true if location is not in a world managed by EmberIsles, letting other plugins deal with
+     * that world (i.e. Spawn world, minigame world, etc.).</p>
+     * 
+     * @param player Player to check
+     * @param location Location where player is trying to use utilities
+     * @return True if player is allowed to use utilities, false otherwise
+     */
+    public boolean canUseUtilities(Player player, Location location) {
+        if (location == null)
+            return true;
+
+        // Not a world managed by this manager, don't touch this event.
+        WorldType worldType = bukkitWorldToWorldType(location.getWorld());
+        if (worldType == null)
+            return true;
+
+        Island island = getIslandAtLoc(location);
+        // We manage this world, location is not part of an island. Denied!
+        if (island == null) {
+            return false;
+        }
+
+        return island.getOwner().equals(player.getUniqueId()) ||
+                (island.isMember(player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.MEMBERS, IslandProtectionFlag.INTERACT_ANVILS)) ||
+                (EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.HELPERS, IslandProtectionFlag.INTERACT_ANVILS));
+    }
+
+    /**
+     * Returns true if specified player can ride mobs on the island at given location. Returns false if player is
+     * attempting to ride on an island it has no permissions for or outside the island space (i.e. on the space
+     * between islands).
+     * 
+     * <p>It also returns true if location is not in a world managed by EmberIsles, letting other plugins deal with
+     * that world (i.e. Spawn world, minigame world, etc.).</p>
+     * 
+     * @param player Player to check
+     * @param location Location where player is trying to ride
+     * @return True if player is allowed to use utilities, false otherwise
+     */
+    public boolean canRide(Player player, Location location) {
+        if (location == null)
+            return true;
+
+        // Not a world managed by this manager, don't touch this event.
+        WorldType worldType = bukkitWorldToWorldType(location.getWorld());
+        if (worldType == null)
+            return true;
+
+        Island island = getIslandAtLoc(location);
+        // We manage this world, location is not part of an island. Denied!
+        if (island == null) {
+            return false;
+        }
+
+        return island.getOwner().equals(player.getUniqueId()) ||
+                (island.isMember(player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.MEMBERS, IslandProtectionFlag.RIDE)) ||
+                (EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.HELPERS, IslandProtectionFlag.RIDE));
+
+    }
+
+    /**
+     * Returns true if specified player can pick or throw items on the ground on the island at given location.
+     * Returns false if player is attempting to do so on an island it has no permissions for or outside the island
+     * space (i.e. on the space between islands).
+     * 
+     * <p>It also returns true if location is not in a world managed by EmberIsles, letting other plugins deal with
+     * that world (i.e. Spawn world, minigame world, etc.).</p>
+     * 
+     * @param player Player to check
+     * @param location Location where player is trying to pick up or throw items
+     * @return True if player is allowed to pick/throw items, false otherwise
+     */
+    public boolean canPickItems(Player player, Location location) {
+        if (location == null)
+            return true;
+
+        // Not a world managed by this manager, don't touch this event.
+        WorldType worldType = bukkitWorldToWorldType(location.getWorld());
+        if (worldType == null)
+            return true;
+
+        Island island = getIslandAtLoc(location);
+        // We manage this world, location is not part of an island. Denied!
+        if (island == null) {
+            return false;
+        }
+
+        return island.getOwner().equals(player.getUniqueId()) ||
+                (island.isMember(player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.MEMBERS, IslandProtectionFlag.PICK_GROUND_ITEMS)) ||
+                (EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.HELPERS, IslandProtectionFlag.PICK_GROUND_ITEMS));
+
+    }
+
+    /**
+     * Returns true if specified player can open or close doors, fences or trap doors on the island at given location.
+     * Returns false if player is attempting to use on an island it has no permissions for or outside the island space
+     * (i.e. on the space between islands).
+     * 
+     * <p>It also returns true if location is not in a world managed by EmberIsles, letting other plugins deal with
+     * that world (i.e. Spawn world, minigame world, etc.).</p>
+     * 
+     * @param player Player to check
+     * @param location Location where player is trying to open or close doors
+     * @return True if player is allowed to open/close doors, false otherwise
+     */
+    public boolean canOpenDoors(Player player, Location location) {
+        if (location == null)
+            return true;
+
+        // Not a world managed by this manager, don't touch this event.
+        WorldType worldType = bukkitWorldToWorldType(location.getWorld());
+        if (worldType == null)
+            return true;
+
+        Island island = getIslandAtLoc(location);
+        // We manage this world, location is not part of an island. Denied!
+        if (island == null) {
+            return false;
+        }
+
+        return island.getOwner().equals(player.getUniqueId()) ||
+                (island.isMember(player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.MEMBERS, IslandProtectionFlag.INTERACT_DOORS)) ||
+                (EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.HELPERS, IslandProtectionFlag.INTERACT_DOORS));
+    }
+
+    /**
+     * Returns true if specified player can open chests and other containers on the island at given location.
+     * Returns false if player is attempting to open on an island it has no permissions for or outside the island space
+     * (i.e. on the space between islands).
+     * 
+     * <p>It also returns true if location is not in a world managed by EmberIsles, letting other plugins deal with
+     * that world (i.e. Spawn world, minigame world, etc.).</p>
+     * 
+     * @param player Player to check
+     * @param location Location where player is trying to open chests
+     * @return True if player is allowed to open chests, false otherwise
+     */
+    public boolean canOpenChests(Player player, Location location) {
+        if (location == null)
+            return true;
+
+        // Not a world managed by this manager, don't touch this event.
+        WorldType worldType = bukkitWorldToWorldType(location.getWorld());
+        if (worldType == null)
+            return true;
+
+        Island island = getIslandAtLoc(location);
+        // We manage this world, location is not part of an island. Denied!
+        if (island == null) {
+            return false;
+        }
+
+        return island.getOwner().equals(player.getUniqueId()) ||
+                (island.isMember(player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.MEMBERS, IslandProtectionFlag.OPEN_CONTAINERS)) ||
+                (EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.HELPERS, IslandProtectionFlag.OPEN_CONTAINERS));
+    }
+
+    /**
+     * Returns true if specified player can open or close switches, levers, etc on the island at given location.
+     * Returns false if player is attempting to use on an island it has no permissions for or outside the island space
+     * (i.e. on the space between islands).
+     * 
+     * <p>It also returns true if location is not in a world managed by EmberIsles, letting other plugins deal with
+     * that world (i.e. Spawn world, minigame world, etc.).</p>
+     * 
+     * @param player Player to check
+     * @param location Location where player is trying to open or close switches
+     * @return True if player is allowed to open/close switches, false otherwise
+     */
+    public boolean canInteractSwitches(Player player, Location location) {
+        if (location == null)
+            return true;
+
+        // Not a world managed by this manager, don't touch this event.
+        WorldType worldType = bukkitWorldToWorldType(location.getWorld());
+        if (worldType == null)
+            return true;
+
+        Island island = getIslandAtLoc(location);
+        // We manage this world, location is not part of an island. Denied!
+        if (island == null) {
+            return false;
+        }
+
+        return island.getOwner().equals(player.getUniqueId()) ||
+                (island.isMember(player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.MEMBERS, IslandProtectionFlag.INTERACT_SWITCHES)) ||
+                (EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.HELPERS, IslandProtectionFlag.INTERACT_SWITCHES));
     }
 
     private static WorldManager instance = null;
