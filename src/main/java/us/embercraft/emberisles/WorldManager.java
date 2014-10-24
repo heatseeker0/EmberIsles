@@ -452,7 +452,7 @@ public class WorldManager {
      * @return True if loc is inside the island space
      */
     public boolean isLocationInIsland(WorldType type, Island island, Location loc) {
-        if (island == null || loc == null)
+        if (type == null || island == null || loc == null)
             return false;
         Location cornerA = getIslandCornerA(type, island);
         Location cornerB = getIslandCornerB(type, island);

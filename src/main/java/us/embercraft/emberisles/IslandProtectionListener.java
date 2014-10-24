@@ -1,5 +1,7 @@
 package us.embercraft.emberisles;
 
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.AnimalTamer;
@@ -35,8 +37,10 @@ import org.bukkit.event.player.PlayerEggThrowEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.world.StructureGrowEvent;
@@ -544,6 +548,52 @@ public class IslandProtectionListener implements Listener {
         if ((pistonIsland != null && !pistonIsland.equals(targetIsland)) ||
                 (targetIsland != null && !targetIsland.equals(pistonIsland)))
             event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onPlayerMove(PlayerMoveEvent event) {
+        if (event.getFrom().getBlock().equals(event.getTo().getBlock()))
+            return;
+
+        final Island island = plugin.getWorldManager().getIslandAtLoc(event.getTo());
+        if (island == null)
+            return;
+        UUID playerId = event.getPlayer().getUniqueId();
+        if (island.isMember(playerId) || island.getOwner().equals(playerId) ||
+                plugin.getHelperManager().isHelping(plugin.getWorldManager().bukkitWorldToWorldType(event.getFrom().getWorld()), island.getLookupKey(), playerId))
+            return;
+        if (island.isLocked() || island.isBanned(playerId)) {
+            if (plugin.getWorldManager().isLocationInIsland(plugin.getWorldManager().bukkitWorldToWorldType(event.getFrom().getWorld()), island, event.getFrom())) {
+                CommandHandlerHelpers.delayedPlayerTeleport(event.getPlayer(), plugin.getServerSpawn());
+            } else {
+                event.setTo(event.getFrom());
+            }
+            event.setCancelled(true);
+            event.getPlayer().sendMessage(plugin.getMessage("you-were-expelled"));
+        }
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onPlayerTeleport(PlayerTeleportEvent event) {
+        if (event.getFrom().getBlock().equals(event.getTo().getBlock()))
+            return;
+
+        final Island island = plugin.getWorldManager().getIslandAtLoc(event.getTo());
+        if (island == null)
+            return;
+        UUID playerId = event.getPlayer().getUniqueId();
+        if (island.isMember(playerId) || island.getOwner().equals(playerId) ||
+                plugin.getHelperManager().isHelping(plugin.getWorldManager().bukkitWorldToWorldType(event.getFrom().getWorld()), island.getLookupKey(), playerId))
+            return;
+        if (island.isLocked() || island.isBanned(playerId)) {
+            if (plugin.getWorldManager().isLocationInIsland(plugin.getWorldManager().bukkitWorldToWorldType(event.getFrom().getWorld()), island, event.getFrom())) {
+                CommandHandlerHelpers.delayedPlayerTeleport(event.getPlayer(), plugin.getServerSpawn());
+            } else {
+                event.setTo(event.getFrom());
+            }
+            event.setCancelled(true);
+            event.getPlayer().sendMessage(plugin.getMessage("you-were-expelled"));
+        }
     }
 
     private EmberIsles plugin;
