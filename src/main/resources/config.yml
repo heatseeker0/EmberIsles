@@ -330,3 +330,5 @@ messages:
   protection-doors: "&cYou are not allowed to open or close doors on this island."
   protection-switches: "&cYou are not allowed to mess with redstone on this island."
   protection-chests: "&cYou are not allowed to open chests on this island."
+  protection-friendly: "&cYou are not allowed to do that on this island."
+  protection-hostile: "&cYou are not allowed to kill hostile mobs on this island."

@@ -1,15 +1,30 @@
 package us.embercraft.emberisles;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.entity.AnimalTamer;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Ocelot;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
+import org.bukkit.entity.Snowball;
+import org.bukkit.entity.ThrownPotion;
+import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityBreakDoorEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityTameEvent;
+import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
@@ -17,12 +32,18 @@ import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerEggThrowEvent;
+import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
+import org.bukkit.event.world.StructureGrowEvent;
+import org.bukkit.inventory.ItemStack;
 
 import us.embercraft.emberisles.datatypes.Island;
+import us.embercraft.emberisles.datatypes.MobType;
 
 public class IslandProtectionListener implements Listener {
     public IslandProtectionListener(EmberIsles plugin) {
@@ -148,30 +169,6 @@ public class IslandProtectionListener implements Listener {
         }
     }
 
-    /**
-     * Called when liquids (lava, water) flow. If the event is cancelled the water will not move.
-     * 
-     * We check if source and destination blocks are both in same island. If not, we cancel the
-     * event to disallow liquids spilling in or out of islands.
-     * 
-     * @param event
-     */
-    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onBlockFromTo(BlockFromToEvent event) {
-        if (event.getBlock() == null || event.getToBlock() == null)
-            return;
-
-        final Island sourceIsland = plugin.getWorldManager().getIslandAtLoc(event.getBlock().getLocation());
-        final Island targetIsland = plugin.getWorldManager().getIslandAtLoc(event.getToBlock().getLocation());
-
-        if (sourceIsland == null && targetIsland == null)
-            return;
-
-        if ((sourceIsland != null && !sourceIsland.equals(targetIsland)) ||
-                (targetIsland != null && !targetIsland.equals(sourceIsland)))
-            event.setCancelled(true);
-    }
-
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onSignChange(SignChangeEvent event) {
         if (event.getBlock() == null)
@@ -291,7 +288,263 @@ public class IslandProtectionListener implements Listener {
         }
     }
 
-    // TODO: Write code
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onPlayerShearEntity(PlayerShearEntityEvent event) {
+        if (event.getEntity() == null)
+            return;
+        if (!plugin.getWorldManager().canInteractFriendly(event.getPlayer(), event.getEntity().getLocation())) {
+            event.getPlayer().sendMessage(plugin.getMessage("protection-friendly"));
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+        if (event.getEntity() == null || event.getDamager() == null || event.getEntityType() == EntityType.PLAYER)
+            return;
+
+        MobType mobType;
+        switch (event.getEntityType()) {
+            case CREEPER:
+            case CAVE_SPIDER:
+            case SPIDER:
+            case ENDERMAN:
+            case GHAST:
+            case GIANT:
+            case PIG_ZOMBIE:
+            case SILVERFISH:
+            case SKELETON:
+            case ZOMBIE:
+            case SLIME:
+            case MAGMA_CUBE:
+            case WITCH:
+            case WITHER:
+                mobType = MobType.HOSTILE;
+                break;
+            case CHICKEN:
+            case COW:
+            case PIG:
+            case HORSE:
+            case WOLF:
+            case OCELOT:
+            case IRON_GOLEM:
+            case SNOWMAN:
+            case SHEEP:
+            case VILLAGER:
+            case MUSHROOM_COW:
+                mobType = MobType.FRIENDLY;
+                break;
+            default:
+                return;
+        }
+        Player damager = null;
+        if (event.getDamager() instanceof Player) {
+            damager = (Player) event.getDamager();
+        } else if (event.getDamager() instanceof Wolf && ((Wolf) event.getDamager()).isTamed()) {
+            AnimalTamer tamer = ((Wolf) event.getDamager()).getOwner();
+            if (tamer != null) {
+                damager = Bukkit.getPlayer(tamer.getUniqueId());
+            } else {
+                // Untamed wolf
+                return;
+            }
+        } else if (event.getDamager() instanceof Ocelot && ((Ocelot) event.getDamager()).isTamed()) {
+            AnimalTamer tamer = ((Ocelot) event.getDamager()).getOwner();
+            if (tamer != null) {
+                damager = Bukkit.getPlayer(tamer.getUniqueId());
+            } else {
+                // Untamed ocelot
+                return;
+            }
+        } else if (event.getDamager() instanceof Arrow) {
+            Arrow arrow = (Arrow) event.getDamager();
+            if (arrow.getShooter() instanceof Player) {
+                damager = (Player) arrow.getShooter();
+            } else {
+                // Skeleton shooters
+                return;
+            }
+        } else if (event.getDamager() instanceof Snowball) {
+            Snowball snowball = (Snowball) event.getDamager();
+            if (snowball.getShooter() instanceof Player) {
+                damager = (Player) snowball.getShooter();
+            } else {
+                // Snowman shooter?
+                return;
+            }
+        } else if (event.getDamager() instanceof ThrownPotion) {
+            ThrownPotion potion = (ThrownPotion) event.getDamager();
+            if (potion.getShooter() instanceof Player) {
+                damager = (Player) potion.getShooter();
+            } else {
+                // Witch potion shooter?
+                return;
+            }
+        } else if (event.getDamager() instanceof Projectile) {
+            // Generic catch all for other projectiles (fishing bobber, eggs, etc.)
+            if (((Projectile) event.getDamager()).getShooter() instanceof Player) {
+                damager = (Player) ((Projectile) event.getDamager()).getShooter();
+            } else {
+                return;
+            }
+        } else {
+            return;
+        }
+        if (damager == null)
+            return;
+
+        switch (mobType) {
+            case FRIENDLY:
+                if (!plugin.getWorldManager().canInteractFriendly(damager, event.getEntity().getLocation())) {
+                    damager.sendMessage(plugin.getMessage("protection-friendly"));
+                    event.setCancelled(true);
+                }
+                return;
+            case HOSTILE:
+                if (!plugin.getWorldManager().canInteractHostile(damager, event.getEntity().getLocation())) {
+                    damager.sendMessage(plugin.getMessage("protection-hostile"));
+                    event.setCancelled(true);
+                }
+                return;
+        }
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onPotionSplash(PotionSplashEvent event) {
+        if (event.getPotion().getShooter() == null || !(event.getPotion().getShooter() instanceof Player) ||
+                event.getAffectedEntities() == null || event.getAffectedEntities().isEmpty())
+            return;
+        /*
+         * If we want to be comprehensive we should cycle through affected entities, determine each entity class (friendly or hostile),
+         * then check the permission for that class. I feel this would be to CPU intensive for minimal benefit.
+         * 
+         * Instead we only check for interact friendly because presumably if a player has permission to kill friendly mobs on an island
+         * then it would have permission to kill hostile mobs too.
+         */
+        if (!plugin.getWorldManager().canInteractFriendly((Player) event.getPotion().getShooter(), event.getAffectedEntities().iterator().next().getLocation())) {
+            ((Player) event.getPotion().getShooter()).sendMessage(plugin.getMessage("protection-friendly"));
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onPlayerFish(PlayerFishEvent event) {
+        if (event.getPlayer() == null || event.getCaught() == null)
+            return;
+
+        if (!plugin.getWorldManager().canBuild(event.getPlayer(), event.getCaught().getLocation())) {
+            event.getPlayer().sendMessage(plugin.getMessage("protection-friendly"));
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onEntityTame(EntityTameEvent event) {
+        if (event.getOwner() == null || event.getEntity() == null)
+            return;
+
+        if (event.getOwner() instanceof Player) {
+            final Player player = (Player) event.getOwner();
+            if (!plugin.getWorldManager().canInteractFriendly(player, event.getEntity().getLocation())) {
+                player.sendMessage(plugin.getMessage("protection-friendly"));
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    /**
+     * Event fired when player right clicks an entity.
+     * 
+     * @param event
+     */
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+        if (event.getRightClicked() == null || event.getPlayer() == null)
+            return;
+
+        final EntityType animal = event.getRightClicked().getType();
+        /*
+         * Allow all player to player interactions.
+         */
+        if (animal == EntityType.PLAYER)
+            return;
+
+        final ItemStack handItem = event.getPlayer().getItemInHand();
+        Material handItemMaterial = null;
+        if (handItem != null)
+            handItemMaterial = handItem.getType();
+
+        if (!plugin.getWorldManager().canInteractFriendly(event.getPlayer(), event.getRightClicked().getLocation())) {
+            // Don't allow villager trading, leash, rename mobs or clone mobs.
+            if (animal == EntityType.VILLAGER ||
+                    Material.LEASH.equals(handItemMaterial) || Material.NAME_TAG.equals(handItemMaterial) || Material.MONSTER_EGG.equals(handItemMaterial)) {
+                event.getPlayer().sendMessage(plugin.getMessage("protection-friendly"));
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onPlayerBonemeal(StructureGrowEvent event) {
+        if (event.getPlayer() == null || !event.isFromBonemeal())
+            return;
+        if (!plugin.getWorldManager().canBuild(event.getPlayer(), event.getLocation())) {
+            event.getPlayer().sendMessage(plugin.getMessage("protection-build"));
+            event.setCancelled(true);
+        }
+    }
+
+    /**
+     * Disallow liquids spilling in or out of islands.
+     */
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onBlockFromTo(BlockFromToEvent event) {
+        if (event.getBlock() == null || event.getToBlock() == null)
+            return;
+
+        final Island sourceIsland = plugin.getWorldManager().getIslandAtLoc(event.getBlock().getLocation());
+        final Island targetIsland = plugin.getWorldManager().getIslandAtLoc(event.getToBlock().getLocation());
+
+        if (sourceIsland == null && targetIsland == null)
+            return;
+
+        if ((sourceIsland != null && !sourceIsland.equals(targetIsland)) ||
+                (targetIsland != null && !targetIsland.equals(sourceIsland)))
+            event.setCancelled(true);
+    }
+
+    /**
+     * No pulling blocks outside our island
+     * 
+     * @param event
+     */
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onPistonRetract(BlockPistonRetractEvent event) {
+        if (!event.isSticky() || event.getBlock() == null || event.getRetractLocation() == null)
+            return;
+        final Island pistonIsland = plugin.getWorldManager().getIslandAtLoc(event.getBlock().getLocation());
+        final Island targetIsland = plugin.getWorldManager().getIslandAtLoc(event.getRetractLocation());
+        if ((pistonIsland != null && !pistonIsland.equals(targetIsland)) ||
+                (targetIsland != null && !targetIsland.equals(pistonIsland)))
+            event.setCancelled(true);
+    }
+
+    /**
+     * No pushing blocks from our island
+     * 
+     * @param event
+     */
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onPistonExtend(BlockPistonExtendEvent event) {
+        if (event.getBlock() == null || event.getLength() == 0 || event.getBlock().getRelative(event.getDirection(), event.getLength()) == null)
+            return;
+
+        final Island pistonIsland = plugin.getWorldManager().getIslandAtLoc(event.getBlock().getLocation());
+        final Island targetIsland = plugin.getWorldManager().getIslandAtLoc(event.getBlock().getRelative(event.getDirection(), event.getLength()).getLocation());
+        if ((pistonIsland != null && !pistonIsland.equals(targetIsland)) ||
+                (targetIsland != null && !targetIsland.equals(pistonIsland)))
+            event.setCancelled(true);
+    }
 
     private EmberIsles plugin;
 }

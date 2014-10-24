@@ -707,7 +707,8 @@ public class WorldManager {
 
         return island.getOwner().equals(player.getUniqueId()) ||
                 island.isMember(player.getUniqueId()) ||
-                EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId());
+                EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId()) ||
+                player.hasPermission("emberisles.admin");
     }
 
     /**
@@ -739,7 +740,8 @@ public class WorldManager {
 
         return island.getOwner().equals(player.getUniqueId()) ||
                 (island.isMember(player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.MEMBERS, IslandProtectionFlag.INTERACT_ANVILS)) ||
-                (EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.HELPERS, IslandProtectionFlag.INTERACT_ANVILS));
+                (EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.HELPERS, IslandProtectionFlag.INTERACT_ANVILS)) ||
+                player.hasPermission("emberisles.admin");
     }
 
     /**
@@ -771,7 +773,8 @@ public class WorldManager {
 
         return island.getOwner().equals(player.getUniqueId()) ||
                 (island.isMember(player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.MEMBERS, IslandProtectionFlag.RIDE)) ||
-                (EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.HELPERS, IslandProtectionFlag.RIDE));
+                (EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.HELPERS, IslandProtectionFlag.RIDE)) ||
+                player.hasPermission("emberisles.admin");
 
     }
 
@@ -804,7 +807,8 @@ public class WorldManager {
 
         return island.getOwner().equals(player.getUniqueId()) ||
                 (island.isMember(player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.MEMBERS, IslandProtectionFlag.PICK_GROUND_ITEMS)) ||
-                (EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.HELPERS, IslandProtectionFlag.PICK_GROUND_ITEMS));
+                (EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.HELPERS, IslandProtectionFlag.PICK_GROUND_ITEMS)) ||
+                player.hasPermission("emberisles.admin");
 
     }
 
@@ -837,7 +841,8 @@ public class WorldManager {
 
         return island.getOwner().equals(player.getUniqueId()) ||
                 (island.isMember(player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.MEMBERS, IslandProtectionFlag.INTERACT_DOORS)) ||
-                (EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.HELPERS, IslandProtectionFlag.INTERACT_DOORS));
+                (EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.HELPERS, IslandProtectionFlag.INTERACT_DOORS)) ||
+                player.hasPermission("emberisles.admin");
     }
 
     /**
@@ -869,7 +874,8 @@ public class WorldManager {
 
         return island.getOwner().equals(player.getUniqueId()) ||
                 (island.isMember(player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.MEMBERS, IslandProtectionFlag.OPEN_CONTAINERS)) ||
-                (EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.HELPERS, IslandProtectionFlag.OPEN_CONTAINERS));
+                (EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.HELPERS, IslandProtectionFlag.OPEN_CONTAINERS)) ||
+                player.hasPermission("emberisles.admin");
     }
 
     /**
@@ -901,7 +907,74 @@ public class WorldManager {
 
         return island.getOwner().equals(player.getUniqueId()) ||
                 (island.isMember(player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.MEMBERS, IslandProtectionFlag.INTERACT_SWITCHES)) ||
-                (EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.HELPERS, IslandProtectionFlag.INTERACT_SWITCHES));
+                (EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.HELPERS, IslandProtectionFlag.INTERACT_SWITCHES)) ||
+                player.hasPermission("emberisles.admin");
+    }
+
+    /**
+     * Returns true if specified player can interact / kill friendly mobs on the island at given location.
+     * Returns false if player is attempting to interact on an island it has no permissions for or outside the island space
+     * (i.e. on the space between islands).
+     * 
+     * <p>It also returns true if location is not in a world managed by EmberIsles, letting other plugins deal with
+     * that world (i.e. Spawn world, minigame world, etc.).</p>
+     * 
+     * @param player Player to check
+     * @param location Location where player is trying to interact with a friendly mob
+     * @return True if player is allowed to interact, false otherwise
+     */
+    public boolean canInteractFriendly(Player player, Location location) {
+        if (location == null)
+            return true;
+
+        // Not a world managed by this manager, don't touch this event.
+        WorldType worldType = bukkitWorldToWorldType(location.getWorld());
+        if (worldType == null)
+            return true;
+
+        Island island = getIslandAtLoc(location);
+        // We manage this world, location is not part of an island. Denied!
+        if (island == null) {
+            return false;
+        }
+
+        return island.getOwner().equals(player.getUniqueId()) ||
+                (island.isMember(player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.MEMBERS, IslandProtectionFlag.FRIENDLY_MOBS)) ||
+                (EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.HELPERS, IslandProtectionFlag.FRIENDLY_MOBS)) ||
+                player.hasPermission("emberisles.admin");
+    }
+
+    /**
+     * Returns true if specified player can interact / kill hostile mobs on the island at given location.
+     * Returns false if player is attempting to interact on an island it has no permissions for or outside the island space
+     * (i.e. on the space between islands).
+     * 
+     * <p>It also returns true if location is not in a world managed by EmberIsles, letting other plugins deal with
+     * that world (i.e. Spawn world, minigame world, etc.).</p>
+     * 
+     * @param player Player to check
+     * @param location Location where player is trying to interact with a hostile mob
+     * @return True if player is allowed to interact, false otherwise
+     */
+    public boolean canInteractHostile(Player player, Location location) {
+        if (location == null)
+            return true;
+
+        // Not a world managed by this manager, don't touch this event.
+        WorldType worldType = bukkitWorldToWorldType(location.getWorld());
+        if (worldType == null)
+            return true;
+
+        Island island = getIslandAtLoc(location);
+        // We manage this world, location is not part of an island. Denied!
+        if (island == null) {
+            return false;
+        }
+
+        return island.getOwner().equals(player.getUniqueId()) ||
+                (island.isMember(player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.MEMBERS, IslandProtectionFlag.HOSTILE_MOBS)) ||
+                (EmberIsles.getInstance().getHelperManager().isHelping(worldType, island.getLookupKey(), player.getUniqueId()) && island.getProtectionFlag(IslandProtectionAccessGroup.HELPERS, IslandProtectionFlag.HOSTILE_MOBS)) ||
+                player.hasPermission("emberisles.admin");
     }
 
     private static WorldManager instance = null;
