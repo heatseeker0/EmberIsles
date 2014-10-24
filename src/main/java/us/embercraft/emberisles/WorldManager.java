@@ -679,6 +679,23 @@ public class WorldManager {
     }
 
     /**
+     * Transfers island ownership to another player. Old owner becomes a member of the island.
+     * 
+     * @param type World type
+     * @param island Island to work with
+     * @param newOwner Player Id to set as new owner
+     */
+    public void transferOwnership(WorldType type, Island island, UUID newOwner) {
+        UUID oldOwner = island.getOwner();
+        if (oldOwner.equals(newOwner))
+            return;
+        island.setOwner(newOwner);
+        island.removeMember(newOwner);
+        island.addMember(oldOwner);
+        setDirty(type);
+    }
+
+    /**
      * Returns true if specified player can build on the island at given location. Returns false if player
      * is attempting to build on an island it has no permissions for or outside the island space (i.e. on the
      * space between islands).

@@ -113,6 +113,10 @@ public class IslandCommandHandler implements CommandExecutor {
                         // /island deleteconfirm <world type> <confirm code>
                         cmdDeleteConfirm(player, split[1], split[2]);
                         return true;
+                    case "transfer":
+                        // /island transfer <world type> <player name>
+                        cmdTransfer(player, split[1], split[2]);
+                        return true;
                 }
                 break;
             case 4:
@@ -141,6 +145,37 @@ public class IslandCommandHandler implements CommandExecutor {
                 break;
         }
         return false;
+    }
+
+    private void cmdTransfer(Player sender, String worldTypeName, String target) {
+        // Valid world type?
+        WorldType worldType = CommandHandlerHelpers.worldNameToType(worldTypeName);
+        if (worldType == null) {
+            sender.sendMessage(String.format(plugin.getMessage("error-invalid-world-type"), worldTypeName.toLowerCase()));
+            return;
+        }
+        // Does the sender belong to an island and is that island owner?
+        Island island = plugin.getWorldManager().getPlayerIsland(worldType, sender.getUniqueId());
+        if (island == null || !island.getOwner().equals(sender.getUniqueId())) {
+            sender.sendMessage(plugin.getMessage("error-not-island-owner"));
+            return;
+        }
+        // Target player uuid
+        UUID targetId = plugin.getPlayerManager().getIdByName(target);
+        if (targetId == null) {
+            sender.sendMessage(plugin.getMessage("error-player-not-found"));
+            return;
+        }
+        if (!island.isMember(targetId)) {
+            sender.sendMessage(String.format(plugin.getMessage("error-not-member"), target));
+            return;
+        }
+        plugin.getWorldManager().transferOwnership(worldType, island, targetId);
+        sender.sendMessage(String.format(plugin.getMessage("transfer-complete-sender"), target));
+        Player targetPlayer = Bukkit.getPlayer(targetId);
+        if (targetPlayer != null && targetPlayer.isOnline()) {
+            targetPlayer.sendMessage(plugin.getMessage("transfer-complete-recipient"));
+        }
     }
 
     private void cmdFlag(Player sender, String worldTypeName, String flagName, String accessGroup, String toggle) {
