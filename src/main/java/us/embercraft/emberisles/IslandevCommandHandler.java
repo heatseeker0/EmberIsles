@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import us.embercraft.emberisles.datatypes.Helper;
 import us.embercraft.emberisles.datatypes.Island;
 import us.embercraft.emberisles.datatypes.WorldType;
+import us.embercraft.emberisles.util.WorldUtils;
 
 public class IslandevCommandHandler implements CommandExecutor {
     public IslandevCommandHandler(EmberIsles plugin) {
@@ -72,23 +73,17 @@ public class IslandevCommandHandler implements CommandExecutor {
             return;
         }
         final Player player = (Player) sender;
-        Island island = plugin.getWorldManager().getIslandAtLoc(player.getLocation());
+        // Island island = plugin.getWorldManager().getIslandAtLoc(player.getLocation());
+        Island island = plugin.getWorldManager().getPlayerIsland(WorldType.NORMAL_WORLD, player.getUniqueId());
         if (island == null) {
             sender.sendMessage(ChatColor.RED + "There is no island at your location.");
             return;
         }
         final Location cornerA = island.getCornerA();
         final Location cornerB = island.getCornerB();
-        final int minX = cornerA.getBlockX();
-        final int maxX = cornerB.getBlockZ();
-        final int minZ = cornerA.getBlockZ();
-        final int maxZ = cornerB.getBlockZ();
-        final World world = cornerA.getWorld();
-        for (int x = minX; x <= maxX; x += 16) {
-            for (int z = minZ; z <= maxZ; z += 16) {
-                world.regenerateChunk(x, z);
-            }
-        }
+        sender.sendMessage("Corner A: " + cornerA);
+        sender.sendMessage("Corner B: " + cornerB);
+        WorldUtils.regenChunks(cornerA, cornerB);
         sender.sendMessage(ChatColor.GREEN + "Clear complete.");
     }
 
@@ -96,6 +91,8 @@ public class IslandevCommandHandler implements CommandExecutor {
      * Generates a platform made of smooth stone 1 block high spanning the entire island world space
      * (from cornerA to cornerB) at y 64. The edges are made out of cobblestone.
      * Must be in game to use.
+     * 
+     * <p><i><strong>Warning:</strong></i> This operation can take a long time to fill ~40k blocks.</p>
      * 
      * @param sender Admin sending the command
      */

@@ -92,6 +92,12 @@ public class EmberIsles extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        /********************************************************************************************************************************************
+         * 
+         * WARNING! Initialization order is critical as many parts depend on others. Don't change the order unless you know what you're doing!
+         * 
+         ********************************************************************************************************************************************/
+
         instance = this;
         pluginManager = getServer().getPluginManager();
 
@@ -113,6 +119,30 @@ public class EmberIsles extends JavaPlugin {
             pluginManager.disablePlugin(this);
             return;
         }
+
+        /*
+         * The Gui manager initialization should be finalized before invoking applyConfig() in case any
+         * Gui screens are generated there.
+         */
+        getGuiManager().initManager(this);
+
+        codeManager = new ConfirmCodeManager(this);
+
+        saveDefaultConfig();
+        applyConfig();
+        loadServerSettings();
+
+        logInfoMessage("Loading Bukkit island worlds");
+        for (WorldType type : WorldType.values()) {
+            logInfoMessage(String.format("** %s", type.getConfigKey()));
+            if (!getWorldManager().generateBukkitWorld(type)) {
+                logErrorMessage(String.format("Fatal error while loading or generating world %s. Plugin disabled.", type.getConfigKey()));
+                pluginManager.disablePlugin(this);
+                return;
+            }
+            getWorldManager().getWorldEditAPI(type).setPasteAttrib(worldEditIgnoreAirBlocks, worldEditPasteEntities);
+        }
+        logInfoMessage("[All loading done]");
 
         logInfoMessage("Loading data structures:");
         logInfoMessage("** Player data");
@@ -140,30 +170,6 @@ public class EmberIsles extends JavaPlugin {
                 return;
             }
             logInfoMessage(String.format("     loaded %d TAKEN and %d FREE islands", getWorldManager().getAllOccupied(type).size(), getWorldManager().getAllFree(type).size()));
-        }
-        logInfoMessage("[All loading done]");
-
-        /*
-         * The Gui manager initialization should be finalized before invoking applyConfig() in case any
-         * Gui screens are generated there.
-         */
-        getGuiManager().initManager(this);
-
-        codeManager = new ConfirmCodeManager(this);
-
-        saveDefaultConfig();
-        applyConfig();
-        loadServerSettings();
-
-        logInfoMessage("Loading Bukkit island worlds");
-        for (WorldType type : WorldType.values()) {
-            logInfoMessage(String.format("** %s", type.getConfigKey()));
-            if (!getWorldManager().generateBukkitWorld(type)) {
-                logErrorMessage(String.format("Fatal error while loading or generating world %s. Plugin disabled.", type.getConfigKey()));
-                pluginManager.disablePlugin(this);
-                return;
-            }
-            getWorldManager().getWorldEditAPI(type).setPasteAttrib(worldEditIgnoreAirBlocks, worldEditPasteEntities);
         }
         logInfoMessage("[All loading done]");
 

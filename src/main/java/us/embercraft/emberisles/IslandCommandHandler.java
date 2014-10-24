@@ -17,6 +17,7 @@ import us.embercraft.emberisles.datatypes.Invite;
 import us.embercraft.emberisles.datatypes.InviteType;
 import us.embercraft.emberisles.datatypes.Island;
 import us.embercraft.emberisles.datatypes.WorldType;
+import us.embercraft.emberisles.util.WorldUtils;
 import us.embercraft.emberisles.util.guimanager.AbstractGui;
 
 public class IslandCommandHandler implements CommandExecutor {
@@ -81,6 +82,10 @@ public class IslandCommandHandler implements CommandExecutor {
                         // /island ban <world type> - Print the list of blacklisted players. All members can see this.
                         cmdBanList(player, split[1]);
                         return true;
+                    case "delete":
+                        // /island delete <world type>
+                        cmdDelete(player, split[1]);
+                        return true;
                 }
                 break;
             case 3:
@@ -96,6 +101,14 @@ public class IslandCommandHandler implements CommandExecutor {
                     case "ban":
                         // /island ban <world type> <player name>
                         cmdBan(player, split[1], split[2]);
+                        return true;
+                    case "leave":
+                        // /island leave <world type> <player name>
+                        cmdLeave(player, split[1], split[2]);
+                        return true;
+                    case "deleteconfirm":
+                        // /island deleteconfirm <world type> <confirm code>
+                        cmdDeleteConfirm(player, split[1], split[2]);
                         return true;
                 }
                 break;
@@ -121,6 +134,119 @@ public class IslandCommandHandler implements CommandExecutor {
                 break;
         }
         return false;
+    }
+
+    private void cmdDeleteConfirm(Player sender, String worldTypeName, String confirmCode) {
+        // Valid world type?
+        WorldType worldType = CommandHandlerHelpers.worldNameToType(worldTypeName);
+        if (worldType == null) {
+            sender.sendMessage(String.format(plugin.getMessage("error-invalid-world-type"), worldTypeName.toLowerCase()));
+            return;
+        }
+        // Does the sender belong to an island and is that island owner?
+        Island island = plugin.getWorldManager().getPlayerIsland(worldType, sender.getUniqueId());
+        if (island == null || !island.getOwner().equals(sender.getUniqueId())) {
+            sender.sendMessage(plugin.getMessage("error-not-island-owner"));
+            return;
+        }
+        // Valid confirm code?
+        if (!plugin.getConfirmCodeManager().isValid(sender, confirmCode)) {
+            sender.sendMessage(plugin.getMessage("confirm-code-invalid"));
+            return;
+        }
+        plugin.getConfirmCodeManager().getAndRemove(sender);
+        // Teleport all players inside island space to spawn
+        if (plugin.getServerSpawn() != null) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (!plugin.getWorldManager().isLocationInIsland(worldType, island, player.getLocation())) {
+                    continue;
+                }
+                CommandHandlerHelpers.delayedPlayerTeleport(player, plugin.getServerSpawn());
+            }
+        }
+        for (Helper helper : plugin.getHelperManager().getIslandHelpers(worldType, island.getLookupKey())) {
+            plugin.getHelperManager().remove(helper);
+        }
+        plugin.getWorldManager().removeIsland(worldType, island);
+        WorldUtils.regenChunks(island.getCornerA(), island.getCornerB());
+        sender.sendMessage(plugin.getMessage("island-deleted"));
+    }
+
+    private void cmdDelete(Player sender, String worldTypeName) {
+        // Valid world type?
+        WorldType worldType = CommandHandlerHelpers.worldNameToType(worldTypeName);
+        if (worldType == null) {
+            sender.sendMessage(String.format(plugin.getMessage("error-invalid-world-type"), worldTypeName.toLowerCase()));
+            return;
+        }
+        // Does the sender belong to an island and is that island owner?
+        Island island = plugin.getWorldManager().getPlayerIsland(worldType, sender.getUniqueId());
+        if (island == null || !island.getOwner().equals(sender.getUniqueId())) {
+            sender.sendMessage(plugin.getMessage("error-not-island-owner"));
+            return;
+        }
+        final String code = plugin.getConfirmCodeManager().generateCode(sender);
+        sender.sendMessage(String.format(plugin.getMessage("delete-confirm"), worldTypeName, code));
+    }
+
+    /**
+     * Member & helpers only, leave current island
+     * 
+     * @param sender Player wanting to leave
+     * @param worldTypeName World type
+     * @param target Island owner
+     */
+    private void cmdLeave(Player sender, String worldTypeName, String target) {
+        // Valid world type?
+        WorldType worldType = CommandHandlerHelpers.worldNameToType(worldTypeName);
+        if (worldType == null) {
+            sender.sendMessage(String.format(plugin.getMessage("error-invalid-world-type"), worldTypeName.toLowerCase()));
+            return;
+        }
+        UUID targetId = plugin.getPlayerManager().getIdByName(target);
+        if (targetId == null) {
+            sender.sendMessage(plugin.getMessage("error-player-not-found"));
+            return;
+        }
+
+        // Does the sender belong to an island?
+        Island island = plugin.getWorldManager().getPlayerIsland(worldType, targetId);
+        if (island == null) {
+            sender.sendMessage(String.format(plugin.getMessage("error-no-island-target"), target, worldTypeName));
+            return;
+        }
+        // Is sender the island owner?
+        if (island.getOwner().equals(sender.getUniqueId())) {
+            sender.sendMessage(plugin.getMessage("cant-leave-owner"));
+            return;
+        }
+        // Regular member?
+        if (island.isMember(sender.getUniqueId())) {
+            plugin.getWorldManager().removeIslandMember(worldType, island, sender.getUniqueId());
+            sender.sendMessage(String.format(plugin.getMessage("player-left-sender"), target));
+            if (plugin.getServerSpawn() != null && plugin.getWorldManager().isLocationInIsland(worldType, island, sender.getLocation())) {
+                CommandHandlerHelpers.delayedPlayerTeleport(sender, plugin.getServerSpawn());
+            }
+            Player islandOwner = Bukkit.getPlayer(targetId);
+            if (islandOwner != null && islandOwner.isOnline()) {
+                islandOwner.sendMessage(String.format(plugin.getMessage("player-left-recipient"), sender.getName()));
+            }
+            return;
+        }
+        // Helper?
+        if (plugin.getHelperManager().isHelping(worldType, island.getLookupKey(), sender.getUniqueId())) {
+            plugin.getHelperManager().remove(new Helper(worldType, island.getLookupKey(), sender.getUniqueId(), 0));
+            sender.sendMessage(String.format(plugin.getMessage("player-left-sender"), target));
+            if (plugin.getServerSpawn() != null && plugin.getWorldManager().isLocationInIsland(worldType, island, sender.getLocation())) {
+                CommandHandlerHelpers.delayedPlayerTeleport(sender, plugin.getServerSpawn());
+            }
+            Player islandOwner = Bukkit.getPlayer(targetId);
+            if (islandOwner != null && islandOwner.isOnline()) {
+                islandOwner.sendMessage(String.format(plugin.getMessage("player-left-recipient"), sender.getName()));
+            }
+            return;
+        }
+        sender.sendMessage(String.format(plugin.getMessage("error-not-member"), target));
     }
 
     /**
