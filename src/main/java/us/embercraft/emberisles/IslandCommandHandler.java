@@ -166,8 +166,9 @@ public class IslandCommandHandler implements CommandExecutor {
             sender.sendMessage(plugin.getMessage("error-player-not-found"));
             return;
         }
+        // Is target player a member of the island?
         if (!island.isMember(targetId)) {
-            sender.sendMessage(String.format(plugin.getMessage("error-not-member"), target));
+            sender.sendMessage(String.format(plugin.getMessage("error-not-member-sender"), target));
             return;
         }
         plugin.getWorldManager().transferOwnership(worldType, island, targetId);
@@ -332,7 +333,7 @@ public class IslandCommandHandler implements CommandExecutor {
             }
             return;
         }
-        sender.sendMessage(String.format(plugin.getMessage("error-not-member"), target));
+        sender.sendMessage(String.format(plugin.getMessage("error-not-member-recipient"), target));
     }
 
     /**
@@ -798,7 +799,7 @@ public class IslandCommandHandler implements CommandExecutor {
 
         if (cmd.equalsIgnoreCase("remove")) {
             if (!island.isMember(recipientId)) {
-                sender.sendMessage(String.format(plugin.getMessage("error-not-member"), playerName));
+                sender.sendMessage(String.format(plugin.getMessage("error-not-member-sender"), playerName));
                 return;
             }
 
