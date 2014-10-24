@@ -16,7 +16,10 @@ import us.embercraft.emberisles.datatypes.Helper;
 import us.embercraft.emberisles.datatypes.Invite;
 import us.embercraft.emberisles.datatypes.InviteType;
 import us.embercraft.emberisles.datatypes.Island;
+import us.embercraft.emberisles.datatypes.IslandProtectionAccessGroup;
+import us.embercraft.emberisles.datatypes.IslandProtectionFlag;
 import us.embercraft.emberisles.datatypes.WorldType;
+import us.embercraft.emberisles.util.MessageUtils;
 import us.embercraft.emberisles.util.WorldUtils;
 import us.embercraft.emberisles.util.guimanager.AbstractGui;
 
@@ -130,10 +133,58 @@ public class IslandCommandHandler implements CommandExecutor {
                         // /island helper <add | remove> <world type> <player name> [helper expire time]
                         cmdHelperManagement(player, split[1], split[2], split[3], split[4]);
                         return true;
+                    case "flag":
+                        // /island flag <world type> <flag name> <members | helpers | public> <on | off>
+                        cmdFlag(player, split[1], split[2], split[3], split[4]);
+                        return true;
                 }
                 break;
         }
         return false;
+    }
+
+    private void cmdFlag(Player sender, String worldTypeName, String flagName, String accessGroup, String toggle) {
+        // Valid world type?
+        WorldType worldType = CommandHandlerHelpers.worldNameToType(worldTypeName);
+        if (worldType == null) {
+            sender.sendMessage(String.format(plugin.getMessage("error-invalid-world-type"), worldTypeName.toLowerCase()));
+            return;
+        }
+        // Valid flag type?
+        IslandProtectionFlag flagType = CommandHandlerHelpers.flagNameToType(flagName);
+        if (flagType == null) {
+            sender.sendMessage(String.format(plugin.getMessage("error-invalid-flag-type"), flagName.toLowerCase()));
+            return;
+        }
+        // Valid group?
+        IslandProtectionAccessGroup groupType = CommandHandlerHelpers.groupNameToType(accessGroup.toLowerCase());
+        if (groupType == null) {
+            sender.sendMessage(String.format(plugin.getMessage("error-invalid-group-type"), accessGroup.toLowerCase()));
+            return;
+        }
+        // Valid flag value?
+        boolean flagValue;
+        switch (toggle.toLowerCase()) {
+            case "on":
+            case "true":
+                flagValue = true;
+                break;
+            case "off":
+            case "false":
+                flagValue = false;
+                break;
+            default:
+                sender.sendMessage(String.format(plugin.getMessage("error-invalid-toggle"), toggle.toLowerCase()));
+                return;
+        }
+        // Does the sender belong to an island and is that island owner?
+        Island island = plugin.getWorldManager().getPlayerIsland(worldType, sender.getUniqueId());
+        if (island == null || !island.getOwner().equals(sender.getUniqueId())) {
+            sender.sendMessage(plugin.getMessage("error-not-island-owner"));
+            return;
+        }
+        plugin.getWorldManager().setIslandProtectionFlag(worldType, island, groupType, flagType, flagValue);
+        sender.sendMessage(String.format(plugin.getMessage("permission-changed"), flagType.getConfigKey(), groupType.getConfigKey(), MessageUtils.parseColors(flagValue ? "&2ON" : "&cOFF")));
     }
 
     private void cmdDeleteConfirm(Player sender, String worldTypeName, String confirmCode) {

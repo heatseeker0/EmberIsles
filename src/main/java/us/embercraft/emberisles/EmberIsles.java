@@ -25,7 +25,7 @@ import us.embercraft.emberisles.datatypes.FutureMenuCommand;
 import us.embercraft.emberisles.datatypes.Helper;
 import us.embercraft.emberisles.datatypes.Island;
 import us.embercraft.emberisles.datatypes.IslandLookupKey;
-import us.embercraft.emberisles.datatypes.IslandProtectionAccessLevel;
+import us.embercraft.emberisles.datatypes.IslandProtectionAccessGroup;
 import us.embercraft.emberisles.datatypes.IslandProtectionFlag;
 import us.embercraft.emberisles.datatypes.PartyDefinitions;
 import us.embercraft.emberisles.datatypes.SchematicDefinition;
@@ -219,7 +219,7 @@ public class EmberIsles extends JavaPlugin {
         /*
          * Set up default island protection flags
          */
-        for (IslandProtectionAccessLevel accessLevel : IslandProtectionAccessLevel.values()) {
+        for (IslandProtectionAccessGroup accessLevel : IslandProtectionAccessGroup.values()) {
             BitSet bits = new BitSet();
             for (IslandProtectionFlag flag : IslandProtectionFlag.values()) {
                 bits.set(flag.id(), config.getBoolean(String.format("island-protection-defaults.%s.%s", accessLevel.getConfigKey(), flag.getConfigKey()), false));
@@ -535,7 +535,7 @@ public class EmberIsles extends JavaPlugin {
         return guiManager;
     }
 
-    public BitSet getDefaultProtectionFlags(final IslandProtectionAccessLevel accessLevel) {
+    public BitSet getDefaultProtectionFlags(final IslandProtectionAccessGroup accessLevel) {
         return defaultProtectionFlags.get(accessLevel);
     }
 
@@ -776,7 +776,7 @@ public class EmberIsles extends JavaPlugin {
      */
     public static FileConfiguration config;
     private final Map<String, String> messages = new HashMap<>();
-    private final Map<IslandProtectionAccessLevel, BitSet> defaultProtectionFlags = new HashMap<>();
+    private final Map<IslandProtectionAccessGroup, BitSet> defaultProtectionFlags = new HashMap<>();
     private String worldGenerator;
     private boolean worldEditIgnoreAirBlocks;
     private boolean worldEditPasteEntities;

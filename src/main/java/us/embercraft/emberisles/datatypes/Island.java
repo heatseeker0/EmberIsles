@@ -29,7 +29,7 @@ public class Island implements Serializable {
      * Initializes and sets common island data to default values.
      */
     private void initDefaultIslandData() {
-        for (IslandProtectionAccessLevel accessLevel : IslandProtectionAccessLevel.values()) {
+        for (IslandProtectionAccessGroup accessLevel : IslandProtectionAccessGroup.values()) {
             protectionFlags.put(accessLevel, (BitSet) EmberIsles.getInstance().getDefaultProtectionFlags(accessLevel).clone());
         }
     }
@@ -156,15 +156,15 @@ public class Island implements Serializable {
         return islandGridZ;
     }
 
-    public boolean getProtectionFlag(final IslandProtectionAccessLevel level, final IslandProtectionFlag flag) {
+    public boolean getProtectionFlag(final IslandProtectionAccessGroup level, final IslandProtectionFlag flag) {
         return protectionFlags.get(level).get(flag.id());
     }
 
-    public void setProtectionFlag(final IslandProtectionAccessLevel level, final IslandProtectionFlag flag, final boolean value) {
+    public void setProtectionFlag(final IslandProtectionAccessGroup level, final IslandProtectionFlag flag, final boolean value) {
         protectionFlags.get(level).set(flag.id(), value);
     }
 
-    public boolean toggleProtectionFlag(final IslandProtectionAccessLevel level, final IslandProtectionFlag flag) {
+    public boolean toggleProtectionFlag(final IslandProtectionAccessGroup level, final IslandProtectionFlag flag) {
         protectionFlags.get(level).flip(flag.id());
         return getProtectionFlag(level, flag);
     }
@@ -287,7 +287,7 @@ public class Island implements Serializable {
     private final long createTime;
     private String schematic;
     private long ownerLastLoginTime;
-    private final Map<IslandProtectionAccessLevel, BitSet> protectionFlags = new HashMap<>();
+    private final Map<IslandProtectionAccessGroup, BitSet> protectionFlags = new HashMap<>();
     private UUID owner;
     private final Set<UUID> members = new HashSet<>();
     private final Set<UUID> bannedPlayers = new HashSet<>();

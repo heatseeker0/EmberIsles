@@ -17,6 +17,8 @@ import org.bukkit.World;
 
 import us.embercraft.emberisles.datatypes.Island;
 import us.embercraft.emberisles.datatypes.IslandLookupKey;
+import us.embercraft.emberisles.datatypes.IslandProtectionAccessGroup;
+import us.embercraft.emberisles.datatypes.IslandProtectionFlag;
 import us.embercraft.emberisles.datatypes.SchematicDefinition;
 import us.embercraft.emberisles.datatypes.SyncType;
 import us.embercraft.emberisles.datatypes.WorldSettings;
@@ -622,6 +624,24 @@ public class WorldManager {
         }
         setDirty(type);
         return island.isLocked();
+    }
+
+    /**
+     * Sets on or off island protection permissions. If the permission is changed, sets the dirty flag on for specified world type.
+     * 
+     * @param type World type
+     * @param island Island to change the flag for
+     * @param level Access group. See {@link IslandProtectionAccessGroup}.
+     * @param flag Island protection permission to change. See {@link IslandProtectionFlag}.
+     * @param value New permission value
+     */
+    public void setIslandProtectionFlag(WorldType type, Island island, IslandProtectionAccessGroup level, IslandProtectionFlag flag, boolean value) {
+        if (type == null || island == null || level == null || flag == null)
+            return;
+        if (island.getProtectionFlag(level, flag) != value) {
+            island.setProtectionFlag(level, flag, value);
+            setDirty(type);
+        }
     }
 
     /**
