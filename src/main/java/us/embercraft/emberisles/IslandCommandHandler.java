@@ -272,6 +272,7 @@ public class IslandCommandHandler implements CommandExecutor {
             sender.sendMessage(plugin.getMessage("error-not-island-owner"));
             return;
         }
+        // TODO: Add and check cooldown for previous clear / delete
         final String code = plugin.getConfirmCodeManager().generateCode(sender);
         sender.sendMessage(String.format(plugin.getMessage("delete-confirm"), worldTypeName, code));
     }

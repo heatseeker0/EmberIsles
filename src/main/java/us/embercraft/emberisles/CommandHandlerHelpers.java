@@ -2,11 +2,13 @@ package us.embercraft.emberisles;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
 import us.embercraft.emberisles.datatypes.IslandProtectionAccessGroup;
 import us.embercraft.emberisles.datatypes.IslandProtectionFlag;
+import us.embercraft.emberisles.datatypes.MobType;
 import us.embercraft.emberisles.datatypes.WorldType;
 
 /**
@@ -86,5 +88,49 @@ public class CommandHandlerHelpers {
                 player.teleport(location, TeleportCause.PLUGIN);
             }
         }, 5L);
+    }
+
+    /**
+     * Returns the mob type (friendly, hostile) based on the given entity type.
+     * 
+     * @param entity Entity type
+     * @return Mob type (friendly, hostile)
+     */
+    public static MobType entityTypeToMobType(EntityType entity) {
+        MobType result = null;
+        switch (entity) {
+            case CREEPER:
+            case CAVE_SPIDER:
+            case SPIDER:
+            case ENDERMAN:
+            case GHAST:
+            case GIANT:
+            case PIG_ZOMBIE:
+            case SILVERFISH:
+            case SKELETON:
+            case ZOMBIE:
+            case SLIME:
+            case MAGMA_CUBE:
+            case WITCH:
+            case WITHER:
+                result = MobType.HOSTILE;
+                break;
+            case CHICKEN:
+            case COW:
+            case PIG:
+            case HORSE:
+            case WOLF:
+            case OCELOT:
+            case IRON_GOLEM:
+            case SNOWMAN:
+            case SHEEP:
+            case VILLAGER:
+            case MUSHROOM_COW:
+                result = MobType.FRIENDLY;
+                break;
+            default:
+                break;
+        }
+        return result;
     }
 }

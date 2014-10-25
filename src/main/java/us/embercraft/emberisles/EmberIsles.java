@@ -250,6 +250,7 @@ public class EmberIsles extends JavaPlugin {
                 settings.setStartingBiome(Biome.valueOf(config.getString(String.format("world-settings.%s.starting-biome", type.getConfigKey()), settings.getStartingBiome().toString()).toUpperCase()));
             } catch (IllegalArgumentException e) {
                 logErrorMessage(String.format("Wrong biome type in config.yml for key world-settings.%s.starting-biome. Using PLAINS for this world type.", type.getConfigKey()));
+                settings.setStartingBiome(Biome.PLAINS);
             }
             settings.setAllowParty(config.getBoolean(String.format("world-settings.%s.allow-party", type.getConfigKey()), settings.getAllowParty()));
             settings.setAllowHelpers(config.getBoolean(String.format("world-settings.%s.allow-helpers", type.getConfigKey()), settings.getAllowHelpers()));
@@ -685,7 +686,14 @@ public class EmberIsles extends JavaPlugin {
             spawnLocation = highestBlock.getLocation().add(0, 1, 0);
         }
         island.setSpawn(spawnLocation);
-        // TODO: Set island biome to configured default biome
+
+        // Set the island biome to configured default biome
+        Biome defaultBiome = getWorldManager().getDefaultWorldSettings(cmd.getWorldType()).getStartingBiome();
+        for (int z = island.getCornerA().getBlockZ(); z <= island.getCornerB().getBlockZ(); z++) {
+            for (int x = island.getCornerA().getBlockX(); x <= island.getCornerB().getBlockX(); x++) {
+                world.setBiome(x, z, defaultBiome);
+            }
+        }
         player.sendMessage(getMessage("island-created"));
         CommandHandlerHelpers.delayedPlayerTeleport(player, spawnLocation);
     }

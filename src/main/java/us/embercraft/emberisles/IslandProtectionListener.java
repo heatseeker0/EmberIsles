@@ -26,6 +26,7 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityBreakDoorEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityTameEvent;
+import org.bukkit.event.entity.PlayerLeashEntityEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
@@ -303,44 +304,33 @@ public class IslandProtectionListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onPlayerLeashEntity(PlayerLeashEntityEvent event) {
+        if (event.getEntity() == null)
+            return;
+        switch (CommandHandlerHelpers.entityTypeToMobType(event.getEntity().getType())) {
+            case FRIENDLY:
+                if (!plugin.getWorldManager().canInteractFriendly(event.getPlayer(), event.getEntity().getLocation())) {
+                    event.getPlayer().sendMessage(plugin.getMessage("protection-friendly"));
+                    event.setCancelled(true);
+                }
+                break;
+            case HOSTILE:
+                if (!plugin.getWorldManager().canInteractHostile(event.getPlayer(), event.getEntity().getLocation())) {
+                    event.getPlayer().sendMessage(plugin.getMessage("protection-hostile"));
+                    event.setCancelled(true);
+                }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
         if (event.getEntity() == null || event.getDamager() == null || event.getEntityType() == EntityType.PLAYER)
             return;
 
-        MobType mobType;
-        switch (event.getEntityType()) {
-            case CREEPER:
-            case CAVE_SPIDER:
-            case SPIDER:
-            case ENDERMAN:
-            case GHAST:
-            case GIANT:
-            case PIG_ZOMBIE:
-            case SILVERFISH:
-            case SKELETON:
-            case ZOMBIE:
-            case SLIME:
-            case MAGMA_CUBE:
-            case WITCH:
-            case WITHER:
-                mobType = MobType.HOSTILE;
-                break;
-            case CHICKEN:
-            case COW:
-            case PIG:
-            case HORSE:
-            case WOLF:
-            case OCELOT:
-            case IRON_GOLEM:
-            case SNOWMAN:
-            case SHEEP:
-            case VILLAGER:
-            case MUSHROOM_COW:
-                mobType = MobType.FRIENDLY;
-                break;
-            default:
-                return;
-        }
+        MobType mobType = CommandHandlerHelpers.entityTypeToMobType(event.getEntityType());
+        if (mobType == null)
+            return;
+
         Player damager = null;
         if (event.getDamager() instanceof Player) {
             damager = (Player) event.getDamager();
