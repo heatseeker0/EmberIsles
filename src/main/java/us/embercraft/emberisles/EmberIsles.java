@@ -32,6 +32,7 @@ import us.embercraft.emberisles.datatypes.SchematicDefinition;
 import us.embercraft.emberisles.datatypes.WorldSettings;
 import us.embercraft.emberisles.datatypes.WorldType;
 import us.embercraft.emberisles.gui.IslandMenuGui;
+import us.embercraft.emberisles.gui.ProtectionFlagsGui;
 import us.embercraft.emberisles.gui.SchematicSelectorGui;
 import us.embercraft.emberisles.gui.WorldSelectorGui;
 import us.embercraft.emberisles.thirdparty.VaultAPI;
@@ -323,6 +324,7 @@ public class EmberIsles extends JavaPlugin {
          * Set up all GUI screens
          */
         getGuiManager().addNewGui(new IslandMenuGui(config.getConfigurationSection("gui-screens.island-gui")));
+        getGuiManager().addNewGui(new ProtectionFlagsGui(config.getConfigurationSection("gui-screens.permissions-gui")));
         getGuiManager().addNewGui(new WorldSelectorGui(config.getConfigurationSection("gui-screens.world-selector")));
         getGuiManager().addNewGui(new SchematicSelectorGui(config.getConfigurationSection("gui-screens.schematic-selector")));
 
@@ -700,6 +702,30 @@ public class EmberIsles extends JavaPlugin {
         CommandHandlerHelpers.delayedPlayerTeleport(player, spawnLocation);
     }
 
+    /**
+     * Opens the island permissions management GUI.
+     * 
+     * @param sender Player to open the GUI for
+     * @param worldType World type
+     */
+    public void showPermissionsGui(Player sender, WorldType worldType) {
+        Island island = getWorldManager().getPlayerIsland(worldType, sender.getUniqueId());
+        if (island == null) {
+            sender.sendMessage(String.format(getMessage("error-no-island"), worldType.getConfigKey()));
+            return;
+        }
+        setGuiWorldType(sender, worldType);
+        getGuiManager().openChainedMenu(sender, "permissions-gui");
+    }
+
+    public void setGuiWorldType(Player sender, WorldType worldType) {
+        guiWorldType.put(sender.getUniqueId(), worldType);
+    }
+
+    public WorldType getGuiWorldType(Player sender) {
+        return guiWorldType.get(sender.getUniqueId());
+    }
+
     public ConfirmCodeManager getConfirmCodeManager() {
         return codeManager;
     }
@@ -782,6 +808,7 @@ public class EmberIsles extends JavaPlugin {
     final static long MILLISECONDS_PER_MINUTE = 60 * 1000L;
     final static long MILLISECONDS_PER_SECOND = 1000L;
     private Map<UUID, FutureMenuCommand> futureCommands = new HashMap<>();
+    private Map<UUID, WorldType> guiWorldType = new HashMap<>();
     private InviteManager inviteManager = new InviteManager();
     private ConfirmCodeManager codeManager;
     private IslandCommandHandler islandCmdHandler = new IslandCommandHandler(this);

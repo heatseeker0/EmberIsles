@@ -41,7 +41,7 @@ public class IslandCommandHandler implements CommandExecutor {
             case 0:
                 // Show the island top level GUI
                 cmdIsland(player);
-                break;
+                return true;
             case 1:
                 switch (split[0].toLowerCase()) {
                     case "create":

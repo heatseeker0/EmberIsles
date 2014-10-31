@@ -28,7 +28,7 @@ public class IslandMenuGui extends AbstractGui {
     @Override
     protected boolean onGuiItemAdd(ItemStack item, String itemKey, Player player) {
         WorldType type = null;
-        if (config.contains(config.getString("items." + itemKey + ".world-type"))) {
+        if (config.contains("items." + itemKey + ".world-type")) {
             try {
                 type = WorldType.getEnum(config.getString("items." + itemKey + ".world-type"));
             } catch (IllegalArgumentException e) {
@@ -37,7 +37,7 @@ public class IslandMenuGui extends AbstractGui {
             }
         }
         TopMenuActions action = null;
-        if (config.contains(config.getString("items." + itemKey + ".action"))) {
+        if (config.contains("items." + itemKey + ".action")) {
             try {
                 action = TopMenuActions.valueOf(config.getString("items." + itemKey + ".action"));
             } catch (IllegalArgumentException e) {
@@ -63,13 +63,13 @@ public class IslandMenuGui extends AbstractGui {
             Pair<WorldType, TopMenuActions> pair = actions.get(menuItem);
             switch (pair.getSecond()) {
                 case ISLAND_HOME:
-                    EmberIsles.getInstance().getIslandCmdHandler().onCommand(player, null, null, new String[] { "home", pair.getFirst().toString() });
+                    EmberIsles.getInstance().getIslandCmdHandler().onCommand(player, null, null, new String[] { "home", pair.getFirst().getConfigKey() });
                     break;
                 case ISLAND_WARP:
-                    player.sendMessage(EmberIsles.getInstance().getMessage("gui-not-implemented"));
+                    EmberIsles.getInstance().getIslandCmdHandler().onCommand(player, null, null, new String[] { "warp", pair.getFirst().getConfigKey(), player.getName() });
                     break;
                 case EXPEL:
-                    player.sendMessage(EmberIsles.getInstance().getMessage("gui-not-implemented"));
+                    EmberIsles.getInstance().getIslandCmdHandler().onCommand(player, null, null, new String[] { "expel", pair.getFirst().getConfigKey() });
                     break;
                 case MANAGE_MEMBERS:
                     player.sendMessage(EmberIsles.getInstance().getMessage("gui-not-implemented"));
@@ -84,7 +84,7 @@ public class IslandMenuGui extends AbstractGui {
                     player.sendMessage(EmberIsles.getInstance().getMessage("gui-not-implemented"));
                     break;
                 case ISLAND_PERMISSIONS:
-                    player.sendMessage(EmberIsles.getInstance().getMessage("gui-not-implemented"));
+                    EmberIsles.getInstance().showPermissionsGui(player, pair.getFirst());
                     break;
             }
         }

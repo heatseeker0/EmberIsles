@@ -255,6 +255,8 @@ gui-screens:
         title: '&6Island home'
         lore:
         - '&2Click to go to your island home'
+        - ''
+        - '&2Normal World'
         world-type: "normal"
         action: ISLAND_HOME
       '2':
@@ -263,6 +265,8 @@ gui-screens:
         title: '&6Island warp'
         lore:
         - '&2Click to go to your island warp'
+        - ''
+        - '&2Normal World'
         world-type: "normal"
         action: ISLAND_WARP
       '3':
@@ -272,6 +276,8 @@ gui-screens:
         lore:
         - '&2Click to expel everyone except members'
         - '&2from your island.'
+        - ''
+        - '&2Normal World'
         world-type: "normal"
         action: EXPEL
       '4':
@@ -280,6 +286,8 @@ gui-screens:
         title: '&aMembers'
         lore:
         - '&2Manage island members'
+        - ''
+        - '&2Normal World'
         world-type: "normal"
         action: MANAGE_MEMBERS
       '5':
@@ -288,6 +296,8 @@ gui-screens:
         title: '&aHelpers'
         lore:
         - '&2Manage island helpers'
+        - ''
+        - '&2Normal World'
         world-type: "normal"
         action: MANAGE_HELPERS
       '6':
@@ -297,6 +307,8 @@ gui-screens:
         lore:
         - '&2Transfer island ownership,'
         - '&2delete island, etc.'
+        - ''
+        - '&2Normal World'
         world-type: "normal"
         action: MANAGE_OWNERSHIP
       '7':
@@ -305,6 +317,8 @@ gui-screens:
         title: '&aIsland Settings'
         lore:
         - '&2Lock / Unlock the warp, and more'
+        - ''
+        - '&2Normal World'
         world-type: "normal"
         action: ISLAND_SETTINGS
       '8':
@@ -313,6 +327,8 @@ gui-screens:
         title: '&aPermissions'
         lore:
         - '&2View / Modify island permissions'
+        - ''
+        - '&2Normal World'
         world-type: "normal"
         action: ISLAND_PERMISSIONS
       '9':
@@ -326,6 +342,8 @@ gui-screens:
         title: '&6Island home'
         lore:
         - '&2Click to go to your island home'
+        - ''
+        - '&6Challenge World'
         world-type: "challenge"
         action: ISLAND_HOME
       '11':
@@ -333,6 +351,8 @@ gui-screens:
         title: '&6Island warp'
         lore:
         - '&2Click to go to your island warp'
+        - ''
+        - '&6Challenge World'
         world-type: "challenge"
         action: ISLAND_WARP
       '12':
@@ -341,6 +361,8 @@ gui-screens:
         lore:
         - '&2Click to expel everyone except members'
         - '&2from your island.'
+        - ''
+        - '&6Challenge World'
         world-type: "challenge"
         action: EXPEL
       '13':
@@ -348,6 +370,8 @@ gui-screens:
         title: '&aMembers'
         lore:
         - '&2Manage island members'
+        - ''
+        - '&6Challenge World'
         world-type: "challenge"
         action: MANAGE_MEMBERS
       '14':
@@ -356,6 +380,8 @@ gui-screens:
         title: '&aHelpers'
         lore:
         - '&2Manage island helpers'
+        - ''
+        - '&6Challenge World'
         world-type: "challenge"
         action: MANAGE_HELPERS
       '15':
@@ -364,6 +390,8 @@ gui-screens:
         lore:
         - '&2Transfer island ownership,'
         - '&2delete island, etc.'
+        - ''
+        - '&6Challenge World'
         world-type: "challenge"
         action: MANAGE_OWNERSHIP
       '16':
@@ -371,6 +399,8 @@ gui-screens:
         title: '&aIsland Settings'
         lore:
         - '&2Lock / Unlock the warp, and more'
+        - ''
+        - '&6Challenge World'
         world-type: "challenge"
         action: ISLAND_SETTINGS
       '17':
@@ -378,6 +408,8 @@ gui-screens:
         title: '&aPermissions'
         lore:
         - '&2View / Modify island permissions'
+        - ''
+        - '&6Challenge World'
         world-type: "challenge"
         action: ISLAND_PERMISSIONS
       '18':
@@ -391,6 +423,8 @@ gui-screens:
         title: '&6Island home'
         lore:
         - '&2Click to go to your island home'
+        - ''
+        - '&cHardcore World'
         world-type: "hardcore"
         action: ISLAND_HOME
       '20':
@@ -398,6 +432,8 @@ gui-screens:
         title: '&6Island warp'
         lore:
         - '&2Click to go to your island warp'
+        - ''
+        - '&cHardcore World'
         world-type: "hardcore"
         action: ISLAND_WARP
       '21':
@@ -406,6 +442,8 @@ gui-screens:
         lore:
         - '&2Click to expel everyone except members'
         - '&2from your island.'
+        - ''
+        - '&cHardcore World'
         world-type: "hardcore"
         action: EXPEL
       '22':
@@ -413,6 +451,8 @@ gui-screens:
         title: '&aMembers'
         lore:
         - '&2Manage island members'
+        - ''
+        - '&cHardcore World'
         world-type: "hardcore"
         action: MANAGE_MEMBERS
       '23':
@@ -421,6 +461,8 @@ gui-screens:
         title: '&aHelpers'
         lore:
         - '&2Manage island helpers'
+        - ''
+        - '&cHardcore World'
         world-type: "hardcore"
         action: MANAGE_HELPERS
       '24':
@@ -429,6 +471,8 @@ gui-screens:
         lore:
         - '&2Transfer island ownership,'
         - '&2delete island, etc.'
+        - ''
+        - '&cHardcore World'
         world-type: "hardcore"
         action: MANAGE_OWNERSHIP
       '25':
@@ -436,6 +480,8 @@ gui-screens:
         title: '&aIsland Settings'
         lore:
         - '&2Lock / Unlock the warp, and more'
+        - ''
+        - '&cHardcore World'
         world-type: "hardcore"
         action: ISLAND_SETTINGS
       '26':
@@ -443,8 +489,166 @@ gui-screens:
         title: '&aPermissions'
         lore:
         - '&2View / Modify island permissions'
+        - ''
+        - '&cHardcore World'
         world-type: "hardcore"
         action: ISLAND_PERMISSIONS
+  permissions-gui:
+    inventory-rows: 3
+    title: Island permissions
+    allowed-lore:
+    - '&2ALLOWED'
+    denied-lore:
+    - '&cDENIED'
+    items:
+      '0':
+        icon: STAINED_CLAY
+        durability: 0
+        title: '&6Members'
+        lore:
+        - '&2Permissions for members'
+      '1':
+        icon: COOKED_CHICKEN
+        durability: 0
+        title: '&6Friendly mobs'
+        access-group: "members"
+        flag: "friendly-mobs"
+      '2':
+        icon: BONE
+        durability: 0
+        title: '&6Hostile mobs'
+        access-group: "members"
+        flag: "hostile-mobs"
+      '3':
+        icon: LEVER
+        durability: 0
+        title: '&6Redstone items'
+        access-group: "members"
+        flag: "interact-switches"
+      '4':
+        icon: CHEST
+        durability: 0
+        title: '&6Open Containers'
+        access-group: "members"
+        flag: "open-containers"
+      '5':
+        icon: WOOD_DOOR
+        durability: 0
+        title: '&6Open Doors'
+        access-group: "members"
+        flag: "interact-doors"
+      '6':
+        icon: COBBLESTONE
+        durability: 0
+        title: '&6Pick ground items'
+        access-group: "members"
+        flag: "pick-ground-items"
+      '7':
+        icon: ANVIL
+        durability: 0
+        title: '&6Utilities (Anvils, Tables, etc.)'
+        access-group: "members"
+        flag: "interact-anvils"
+      '8':
+        icon: SADDLE
+        durability: 0
+        title: '&6Ride'
+        access-group: "members"
+        flag: "ride"
+      '9':
+        icon: STAINED_CLAY
+        durability: 3
+        title: '&6Helpers'
+        lore:
+        - '&2Permissions for helpers'
+      '10':
+        icon: COOKED_CHICKEN
+        durability: 0
+        title: '&6Friendly mobs'
+        access-group: "helpers"
+        flag: "friendly-mobs"
+      '11':
+        icon: BONE
+        title: '&6Hostile mobs'
+        access-group: "helpers"
+        flag: "hostile-mobs"
+      '12':
+        icon: LEVER
+        title: '&6Redstone items'
+        access-group: "helpers"
+        flag: "interact-switches"
+      '13':
+        icon: CHEST
+        title: '&6Open Containers'
+        access-group: "helpers"
+        flag: "open-containers"
+      '14':
+        icon: WOOD_DOOR
+        title: '&6Open Doors'
+        access-group: "helpers"
+        flag: "interact-doors"
+      '15':
+        icon: COBBLESTONE
+        title: '&6Pick ground items'
+        access-group: "helpers"
+        flag: "pick-ground-items"
+      '16':
+        icon: ANVIL
+        title: '&6Utilities (Anvils, Tables, etc.)'
+        access-group: "helpers"
+        flag: "interact-anvils"
+      '17':
+        icon: SADDLE
+        title: '&6Ride'
+        access-group: "helpers"
+        flag: "ride"
+      '18':
+        icon: STAINED_CLAY
+        durability: 5
+        title: '&6Public'
+        lore:
+        - '&2Permissions for everyone else'
+      '19':
+        icon: COOKED_CHICKEN
+        durability: 0
+        title: '&6Friendly mobs'
+        access-group: "public"
+        flag: "friendly-mobs"
+      '20':
+        icon: BONE
+        title: '&6Hostile mobs'
+        access-group: "public"
+        flag: "hostile-mobs"
+      '21':
+        icon: LEVER
+        title: '&6Redstone items'
+        access-group: "public"
+        flag: "interact-switches"
+      '22':
+        icon: CHEST
+        title: '&6Open Containers'
+        access-group: "public"
+        flag: "open-containers"
+      '23':
+        icon: WOOD_DOOR
+        title: '&6Open Doors'
+        access-group: "public"
+        flag: "interact-doors"
+      '24':
+        icon: COBBLESTONE
+        title: '&6Pick ground items'
+        access-group: "public"
+        flag: "pick-ground-items"
+      '25':
+        icon: ANVIL
+        title: '&6Utilities (Anvils, Tables, etc.)'
+        access-group: "public"
+        flag: "interact-anvils"
+      '26':
+        icon: SADDLE
+        title: '&6Ride'
+        access-group: "public"
+        flag: "ride"
 messages:
   print-loc: '&6Your current location is: &f%s'
   server-spawn-notset: "&cServer spawn isn't set. Use &6/islandev setserverspawn &cto set it."
