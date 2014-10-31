@@ -590,6 +590,18 @@ public class WorldManager {
     }
 
     /**
+     * Sets the given island home (spawn) at specified location.
+     * 
+     * @param type World type
+     * @param island Island to set the spawn for
+     * @param loc Location of the new spawn
+     */
+    public void setIslandHome(WorldType type, Island island, Location loc) {
+        island.setSpawn(loc);
+        setDirty(type);
+    }
+
+    /**
      * Toggles the island warp on or off. Returns the new state of the warp.
      * 
      * @param type World type

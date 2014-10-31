@@ -34,6 +34,7 @@ import us.embercraft.emberisles.datatypes.WorldType;
 import us.embercraft.emberisles.gui.IslandMenuGui;
 import us.embercraft.emberisles.gui.ProtectionFlagsGui;
 import us.embercraft.emberisles.gui.SchematicSelectorGui;
+import us.embercraft.emberisles.gui.SettingsGui;
 import us.embercraft.emberisles.gui.WorldSelectorGui;
 import us.embercraft.emberisles.thirdparty.VaultAPI;
 import us.embercraft.emberisles.thirdparty.WorldEditAPI;
@@ -327,6 +328,7 @@ public class EmberIsles extends JavaPlugin {
         getGuiManager().addNewGui(new ProtectionFlagsGui(config.getConfigurationSection("gui-screens.permissions-gui")));
         getGuiManager().addNewGui(new WorldSelectorGui(config.getConfigurationSection("gui-screens.world-selector")));
         getGuiManager().addNewGui(new SchematicSelectorGui(config.getConfigurationSection("gui-screens.schematic-selector")));
+        getGuiManager().addNewGui(new SettingsGui(config.getConfigurationSection("gui-screens.settings-gui")));
 
         /*
          * Set up automated data store saving tasks
@@ -716,6 +718,22 @@ public class EmberIsles extends JavaPlugin {
         }
         setGuiWorldType(sender, worldType);
         getGuiManager().openChainedMenu(sender, "permissions-gui");
+    }
+
+    /**
+     * Opens the island settings GUI.
+     * 
+     * @param sender Player to open the GUI for
+     * @param worldType World type
+     */
+    public void showSettingsGui(Player sender, WorldType worldType) {
+        Island island = getWorldManager().getPlayerIsland(worldType, sender.getUniqueId());
+        if (island == null) {
+            sender.sendMessage(String.format(getMessage("error-no-island"), worldType.getConfigKey()));
+            return;
+        }
+        setGuiWorldType(sender, worldType);
+        getGuiManager().openChainedMenu(sender, "settings-gui");
     }
 
     public void setGuiWorldType(Player sender, WorldType worldType) {

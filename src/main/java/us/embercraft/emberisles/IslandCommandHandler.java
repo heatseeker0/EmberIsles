@@ -52,6 +52,10 @@ public class IslandCommandHandler implements CommandExecutor {
                          */
                         cmdIslandCreate(player);
                         return true;
+                    case "sethome":
+                        // /island sethome - sets the island home for the island the player is on, provided it is the island owner
+                        cmdSetHome(player);
+                        return true;
                     case "setwarp":
                         // /island setwarp - sets the island warp for the island the player is on, provided it is the island owner
                         cmdSetWarp(player);
@@ -76,6 +80,10 @@ public class IslandCommandHandler implements CommandExecutor {
                     case "togglewarp":
                         // /island togglewarp <world type> - Toggles their island warp on / off for specified world
                         cmdToggleWarp(player, split[1]);
+                        return true;
+                    case "togglelock":
+                        // /island togglelock <world type> - Toggles their island lock on / off for specified world
+                        cmdToggleLock(player, split[1]);
                         return true;
                     case "lock":
                         // /island lock <world type> - Locks their island so only members and helpers can enter it's space by any means
@@ -445,6 +453,26 @@ public class IslandCommandHandler implements CommandExecutor {
         sender.sendMessage(String.format(plugin.getMessage("island-blacklist-entry"), sb.toString()));
     }
 
+    private void cmdToggleLock(Player sender, String worldTypeName) {
+        // Valid world type?
+        WorldType worldType = CommandHandlerHelpers.worldNameToType(worldTypeName);
+        if (worldType == null) {
+            sender.sendMessage(String.format(plugin.getMessage("error-invalid-world-type"), worldTypeName.toLowerCase()));
+            return;
+        }
+        // Does the sender belong to an island and is that island owner?
+        Island island = plugin.getWorldManager().getPlayerIsland(worldType, sender.getUniqueId());
+        if (island == null || !island.getOwner().equals(sender.getUniqueId())) {
+            sender.sendMessage(plugin.getMessage("error-not-island-owner"));
+            return;
+        }
+        if (plugin.getWorldManager().toggleIslandLock(worldType, island)) {
+            sender.sendMessage(plugin.getMessage("island-locked"));
+        } else {
+            sender.sendMessage(plugin.getMessage("island-unlocked"));
+        }
+    }
+
     /**
      * Locks or unlocks the island. Nobody except members and helpers can enter a locked island space by any means.
      * 
@@ -510,6 +538,26 @@ public class IslandCommandHandler implements CommandExecutor {
         } else {
             sender.sendMessage(plugin.getMessage("warp-toggle-off"));
         }
+    }
+
+    /**
+     * Sets the island home at sender location, provided the sender is the island owner and is on her island.
+     * 
+     * @param sender Island owner
+     */
+    private void cmdSetHome(Player sender) {
+        final Location senderLoc = sender.getLocation();
+        Island island = plugin.getWorldManager().getIslandAtLoc(senderLoc);
+        if (island == null) {
+            sender.sendMessage(plugin.getMessage("error-not-on-island"));
+            return;
+        }
+        if (!island.getOwner().equals(sender.getUniqueId())) {
+            sender.sendMessage(plugin.getMessage("error-you-must-be-owner"));
+            return;
+        }
+        plugin.getWorldManager().setIslandHome(plugin.getWorldManager().bukkitWorldToWorldType(senderLoc.getWorld()), island, senderLoc);
+        sender.sendMessage(plugin.getMessage("home-set"));
     }
 
     /**

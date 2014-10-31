@@ -649,6 +649,54 @@ gui-screens:
         title: '&6Ride'
         access-group: "public"
         flag: "ride"
+  settings-gui:
+    inventory-rows: 3
+    title: "Island Settings"
+    items:
+      '0':
+        icon: BED
+        title: '&6Set Island Home'
+        lore:
+        - '&2Click to set island HOME'
+        - '&2at your location. Must be on'
+        - '&2your island to use.'
+        action: SET_HOME
+      '3':
+        icon: ENDER_PEARL
+        title: '&6Set Island Warp'
+        lore:
+        - '&2Click to set island WARP'
+        - '&2at your location. Must be on'
+        - '&2your island to use.'
+        action: SET_WARP
+      '4':
+        icon: EYE_OF_ENDER
+        title: '&6Toggle Island Warp'
+        on-lore:
+        - '&2Warp is ON'
+        - ''
+        - '&2Click to disable the warp'
+        off-lore:
+        - '&cWarp is OFF'
+        - ''
+        - '&cClick to enable the warp'
+        - "&c&oWon't work if the warp is not set"
+        action: TOGGLE_WARP
+      '7':
+        icon: ENDER_PORTAL_FRAME
+        title: '&6Toggle Island Lock'
+        unlocked-lore:
+        - '&2Island is UNLOCKED'
+        - '&2Anyone can visit your island'
+        - ''
+        - '&2Click to lock your island'
+        locked-lore:
+        - '&cIsland is LOCKED'
+        - '&cOnly members and helpers can enter'
+        - ''
+        - '&cClick to unlock your island'
+        action: TOGGLE_ISLAND_LOCK
+
 messages:
   print-loc: '&6Your current location is: &f%s'
   server-spawn-notset: "&cServer spawn isn't set. Use &6/islandev setserverspawn &cto set it."
@@ -709,6 +757,7 @@ messages:
   error-not-on-island: "&cYou have to be on your island to use this command."
   error-you-must-be-owner: "&cYou are not this island owner."
   warp-set: "&2Island warp set."
+  home-set: "&2Island home set."
   warp-toggle-on: "&2Your island warp is now &6ENABLED"
   warp-toggle-off: "&2Your island warp is now &6DISABLED"
   error-warp-not-set: "&cYour island has no warp set. Do &6/is setwarp &c to set the warp before you can enable it."

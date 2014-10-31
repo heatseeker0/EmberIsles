@@ -81,7 +81,7 @@ public class IslandMenuGui extends AbstractGui {
                     player.sendMessage(EmberIsles.getInstance().getMessage("gui-not-implemented"));
                     break;
                 case ISLAND_SETTINGS:
-                    player.sendMessage(EmberIsles.getInstance().getMessage("gui-not-implemented"));
+                    EmberIsles.getInstance().showSettingsGui(player, pair.getFirst());
                     break;
                 case ISLAND_PERMISSIONS:
                     EmberIsles.getInstance().showPermissionsGui(player, pair.getFirst());
