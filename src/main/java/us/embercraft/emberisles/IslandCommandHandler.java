@@ -38,6 +38,10 @@ public class IslandCommandHandler implements CommandExecutor {
         final Player player = (Player) sender;
 
         switch (split.length) {
+            case 0:
+                // Show the island top level GUI
+                cmdIsland(player);
+                break;
             case 1:
                 switch (split[0].toLowerCase()) {
                     case "create":
@@ -145,6 +149,16 @@ public class IslandCommandHandler implements CommandExecutor {
                 break;
         }
         return false;
+    }
+
+    private void cmdIsland(Player sender) {
+        AbstractGui worldSelector = plugin.getGuiManager().getGuiByKey("island-gui");
+        if (worldSelector == null) {
+            plugin.logErrorMessage("Gui screen island-gui missing or invalid in config.yml.");
+            sender.sendMessage(plugin.getMessage("error-internal-misconfigured"));
+            return;
+        }
+        sender.openInventory(worldSelector.createGui(sender));
     }
 
     private void cmdTransfer(Player sender, String worldTypeName, String target) {

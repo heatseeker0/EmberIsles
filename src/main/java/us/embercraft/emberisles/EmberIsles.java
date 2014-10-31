@@ -31,6 +31,7 @@ import us.embercraft.emberisles.datatypes.PartyDefinitions;
 import us.embercraft.emberisles.datatypes.SchematicDefinition;
 import us.embercraft.emberisles.datatypes.WorldSettings;
 import us.embercraft.emberisles.datatypes.WorldType;
+import us.embercraft.emberisles.gui.IslandMenuGui;
 import us.embercraft.emberisles.gui.SchematicSelectorGui;
 import us.embercraft.emberisles.gui.WorldSelectorGui;
 import us.embercraft.emberisles.thirdparty.VaultAPI;
@@ -176,7 +177,7 @@ public class EmberIsles extends JavaPlugin {
         pluginManager.registerEvents(new PlayerLoginListener(this), this);
         pluginManager.registerEvents(new IslandProtectionListener(this), this);
 
-        getCommand("island").setExecutor(new IslandCommandHandler(this));
+        getCommand("island").setExecutor(islandCmdHandler);
         getCommand("islandev").setExecutor(new IslandevCommandHandler(this));
 
         /*
@@ -321,6 +322,7 @@ public class EmberIsles extends JavaPlugin {
         /*
          * Set up all GUI screens
          */
+        getGuiManager().addNewGui(new IslandMenuGui(config.getConfigurationSection("gui-screens.island-gui")));
         getGuiManager().addNewGui(new WorldSelectorGui(config.getConfigurationSection("gui-screens.world-selector")));
         getGuiManager().addNewGui(new SchematicSelectorGui(config.getConfigurationSection("gui-screens.schematic-selector")));
 
@@ -765,6 +767,10 @@ public class EmberIsles extends JavaPlugin {
         return YamlConfiguration.loadConfiguration(configurationFile);
     }
 
+    public IslandCommandHandler getIslandCmdHandler() {
+        return islandCmdHandler;
+    }
+
     /*
      * Misc internally used variables.
      */
@@ -778,6 +784,7 @@ public class EmberIsles extends JavaPlugin {
     private Map<UUID, FutureMenuCommand> futureCommands = new HashMap<>();
     private InviteManager inviteManager = new InviteManager();
     private ConfirmCodeManager codeManager;
+    private IslandCommandHandler islandCmdHandler = new IslandCommandHandler(this);
 
     /*
      * Config settings

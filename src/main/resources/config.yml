@@ -239,6 +239,212 @@ gui-screens:
     inventory-rows: 1
     title: "&1Select &6island schematic"
     # items are populated at runtime based on definitions above in schematics section
+  island-gui:
+    inventory-rows: 3
+    title: 'Island menu'
+    items:
+      '0':
+        icon: STAINED_CLAY
+        durability: 13
+        title: '&aNormal Island'
+        lore: []
+        world-type: "normal"
+      '1':
+        icon: PISTON_STICKY_BASE
+        durability: 0
+        title: '&6Island home'
+        lore:
+        - '&2Click to go to your island home'
+        world-type: "normal"
+        action: ISLAND_HOME
+      '2':
+        icon: PISTON_BASE
+        durability: 0
+        title: '&6Island warp'
+        lore:
+        - '&2Click to go to your island warp'
+        world-type: "normal"
+        action: ISLAND_WARP
+      '3':
+        icon: ENDER_PEARL
+        durability: 0
+        title: '&aExpel Visitors'
+        lore:
+        - '&2Click to expel everyone except members'
+        - '&2from your island.'
+        world-type: "normal"
+        action: EXPEL
+      '4':
+        icon: RED_ROSE
+        durability: 0
+        title: '&aMembers'
+        lore:
+        - '&2Manage island members'
+        world-type: "normal"
+        action: MANAGE_MEMBERS
+      '5':
+        icon: RED_ROSE
+        durability: 3
+        title: '&aHelpers'
+        lore:
+        - '&2Manage island helpers'
+        world-type: "normal"
+        action: MANAGE_HELPERS
+      '6':
+        icon: OBSIDIAN
+        durability: 0
+        title: '&aOwnership'
+        lore:
+        - '&2Transfer island ownership,'
+        - '&2delete island, etc.'
+        world-type: "normal"
+        action: MANAGE_OWNERSHIP
+      '7':
+        icon: BEACON
+        durability: 0
+        title: '&aIsland Settings'
+        lore:
+        - '&2Lock / Unlock the warp, and more'
+        world-type: "normal"
+        action: ISLAND_SETTINGS
+      '8':
+        icon: DIODE
+        durability: 0
+        title: '&aPermissions'
+        lore:
+        - '&2View / Modify island permissions'
+        world-type: "normal"
+        action: ISLAND_PERMISSIONS
+      '9':
+        icon: STAINED_CLAY
+        durability: 1
+        title: '&6Challenge Island'
+        lore: []
+        world-type: "challenge"
+      '10':
+        icon: PISTON_STICKY_BASE
+        title: '&6Island home'
+        lore:
+        - '&2Click to go to your island home'
+        world-type: "challenge"
+        action: ISLAND_HOME
+      '11':
+        icon: PISTON_BASE
+        title: '&6Island warp'
+        lore:
+        - '&2Click to go to your island warp'
+        world-type: "challenge"
+        action: ISLAND_WARP
+      '12':
+        icon: ENDER_PEARL
+        title: '&aExpel Visitors'
+        lore:
+        - '&2Click to expel everyone except members'
+        - '&2from your island.'
+        world-type: "challenge"
+        action: EXPEL
+      '13':
+        icon: RED_ROSE
+        title: '&aMembers'
+        lore:
+        - '&2Manage island members'
+        world-type: "challenge"
+        action: MANAGE_MEMBERS
+      '14':
+        icon: RED_ROSE
+        durability: 3
+        title: '&aHelpers'
+        lore:
+        - '&2Manage island helpers'
+        world-type: "challenge"
+        action: MANAGE_HELPERS
+      '15':
+        icon: OBSIDIAN
+        title: '&aOwnership'
+        lore:
+        - '&2Transfer island ownership,'
+        - '&2delete island, etc.'
+        world-type: "challenge"
+        action: MANAGE_OWNERSHIP
+      '16':
+        icon: BEACON
+        title: '&aIsland Settings'
+        lore:
+        - '&2Lock / Unlock the warp, and more'
+        world-type: "challenge"
+        action: ISLAND_SETTINGS
+      '17':
+        icon: DIODE
+        title: '&aPermissions'
+        lore:
+        - '&2View / Modify island permissions'
+        world-type: "challenge"
+        action: ISLAND_PERMISSIONS
+      '18':
+        icon: STAINED_CLAY
+        durability: 14
+        title: '&cHardcore Island'
+        lore: []
+        world-type: "hardcore"
+      '19':
+        icon: PISTON_STICKY_BASE
+        title: '&6Island home'
+        lore:
+        - '&2Click to go to your island home'
+        world-type: "hardcore"
+        action: ISLAND_HOME
+      '20':
+        icon: PISTON_BASE
+        title: '&6Island warp'
+        lore:
+        - '&2Click to go to your island warp'
+        world-type: "hardcore"
+        action: ISLAND_WARP
+      '21':
+        icon: ENDER_PEARL
+        title: '&aExpel Visitors'
+        lore:
+        - '&2Click to expel everyone except members'
+        - '&2from your island.'
+        world-type: "hardcore"
+        action: EXPEL
+      '22':
+        icon: RED_ROSE
+        title: '&aMembers'
+        lore:
+        - '&2Manage island members'
+        world-type: "hardcore"
+        action: MANAGE_MEMBERS
+      '23':
+        icon: RED_ROSE
+        durability: 3
+        title: '&aHelpers'
+        lore:
+        - '&2Manage island helpers'
+        world-type: "hardcore"
+        action: MANAGE_HELPERS
+      '24':
+        icon: OBSIDIAN
+        title: '&aOwnership'
+        lore:
+        - '&2Transfer island ownership,'
+        - '&2delete island, etc.'
+        world-type: "hardcore"
+        action: MANAGE_OWNERSHIP
+      '25':
+        icon: BEACON
+        title: '&aIsland Settings'
+        lore:
+        - '&2Lock / Unlock the warp, and more'
+        world-type: "hardcore"
+        action: ISLAND_SETTINGS
+      '26':
+        icon: DIODE
+        title: '&aPermissions'
+        lore:
+        - '&2View / Modify island permissions'
+        world-type: "hardcore"
+        action: ISLAND_PERMISSIONS
 messages:
   print-loc: '&6Your current location is: &f%s'
   server-spawn-notset: "&cServer spawn isn't set. Use &6/islandev setserverspawn &cto set it."
@@ -334,3 +540,4 @@ messages:
   protection-hostile: "&cYou are not allowed to kill hostile mobs on this island."
   transfer-complete-sender: "&2You have successfully transferred island ownership to %s."
   transfer-complete-recipient: "&6You are now the owner of the island."
+  gui-not-implemented: "&cNot implemented yet."

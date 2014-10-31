@@ -324,6 +324,7 @@ public class IslandProtectionListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+        // TODO: If getEntityType() == PLAYER make sure mobs can't damage it if the player can't damage the mobs back.
         if (event.getEntity() == null || event.getDamager() == null || event.getEntityType() == EntityType.PLAYER)
             return;
 
