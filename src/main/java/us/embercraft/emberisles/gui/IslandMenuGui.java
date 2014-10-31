@@ -28,21 +28,27 @@ public class IslandMenuGui extends AbstractGui {
     @Override
     protected boolean onGuiItemAdd(ItemStack item, String itemKey, Player player) {
         WorldType type = null;
-        try {
-            type = WorldType.getEnum(config.getString("items." + itemKey + ".world-type"));
-        } catch (IllegalArgumentException e) {
-            EmberIsles.getInstance().logErrorMessage(String.format("Wrong world type in config.yml for key item.%s.world-type. This menu entry won't be available to players until the error is corrected.", itemKey));
-            return false;
+        if (config.contains(config.getString("items." + itemKey + ".world-type"))) {
+            try {
+                type = WorldType.getEnum(config.getString("items." + itemKey + ".world-type"));
+            } catch (IllegalArgumentException e) {
+                EmberIsles.getInstance().logErrorMessage(String.format("Wrong world type in config.yml for key item.%s.world-type. This menu entry won't be available to players until the error is corrected.", itemKey));
+                return false;
+            }
         }
         TopMenuActions action = null;
-        try {
-            action = TopMenuActions.valueOf(config.getString("items." + itemKey + ".action"));
-        } catch (IllegalArgumentException e) {
-            EmberIsles.getInstance().logErrorMessage(String.format("Wrong action in config.yml for key item.%s.action. This menu entry won't be available to players until the error is corrected.", itemKey));
-            return false;
+        if (config.contains(config.getString("items." + itemKey + ".action"))) {
+            try {
+                action = TopMenuActions.valueOf(config.getString("items." + itemKey + ".action"));
+            } catch (IllegalArgumentException e) {
+                EmberIsles.getInstance().logErrorMessage(String.format("Wrong action in config.yml for key item.%s.action. This menu entry won't be available to players until the error is corrected.", itemKey));
+                return false;
+            }
         }
-        actions.put(item, new Pair<>(type, action));
-        return false;
+        if (type != null && action != null) {
+            actions.put(item, new Pair<>(type, action));
+        }
+        return true;
     }
 
     @SuppressWarnings("hiding")
