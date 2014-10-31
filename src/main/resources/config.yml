@@ -696,7 +696,24 @@ gui-screens:
         - ''
         - '&cClick to unlock your island'
         action: TOGGLE_ISLAND_LOCK
-
+help:
+- "Main command: /island (or /is, /skyblock, /sb). Brings up the island GUI."
+- ""
+- "Full list of available commands:"
+- "/is create - Bring up the island creation GUI"
+- "/is sethome - Sets the island home. You must be on your island (Owner only)"
+- "/is setwarp - Sets the island warp. You must be on your island (Owner only)"
+- "/is home <world type> - Teleports you to your island home"
+- "/is warp <world type> <player name> - Teleports you to specified player warp"
+- "/is expel <world type> [player name] - Expels all non-members from your island. If player name is specified it expels just that player."
+- "/is ban <world type> - Displays the list of banned players"
+- "/is ban <world type> <player name> - Bans specified player from entering your island. Type same command to unban (Owner only)"
+- "/is leave <world type> - Leave the island you're on (Member & Helper only)"
+- "/is transfer <world type> <player name> - Transfer your island to specified player. Has to be a member of the island (Owner only)"
+- "/is delete <world type> - Deletes your island (Owner only)"
+- "/is member <add | remove> <world type> <player name> - Sends an invite to add new members to your island or remove a member (Owner only)"
+- "/is helper <add | remove> <world type> <player name> [helper expire time] - Sends an invite to add new helpers to your island (Owner only)"
+- "/is flag <world type> <flag name> <members | helpers | public> <on | off> - Turns on and off various island permissions (Owner only)"
 messages:
   print-loc: '&6Your current location is: &f%s'
   server-spawn-notset: "&cServer spawn isn't set. Use &6/islandev setserverspawn &cto set it."

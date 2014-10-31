@@ -60,6 +60,10 @@ public class IslandCommandHandler implements CommandExecutor {
                         // /island setwarp - sets the island warp for the island the player is on, provided it is the island owner
                         cmdSetWarp(player);
                         return true;
+                    case "help":
+                        // /island help - display the main help file
+                        cmdHelp(player);
+                        return true;
                 }
                 break;
             case 2:
@@ -157,6 +161,12 @@ public class IslandCommandHandler implements CommandExecutor {
                 break;
         }
         return false;
+    }
+
+    private void cmdHelp(Player player) {
+        for (String msg : plugin.getHelp()) {
+            player.sendMessage(msg);
+        }
     }
 
     private void cmdIsland(Player sender) {

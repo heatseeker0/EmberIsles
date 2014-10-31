@@ -2,9 +2,11 @@ package us.embercraft.emberisles;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -215,6 +217,9 @@ public class EmberIsles extends JavaPlugin {
         for (String msgKey : config.getConfigurationSection("messages").getKeys(false)) {
             messages.put(msgKey, MessageUtils.parseColors(config.getString(String.format("messages.%s", msgKey))));
         }
+
+        help.clear();
+        help.addAll(MessageUtils.parseColors(config.getStringList("help")));
 
         worldGenerator = config.getString("world-generator", "CleanroomGenerator:.");
         codeManager.setCodeExpireTime(config.getInt("codes-expire-time", 30));
@@ -516,6 +521,10 @@ public class EmberIsles extends JavaPlugin {
         final String errorMsg = "No message text in config.yml for " + key;
         logErrorMessage(errorMsg);
         return errorMsg;
+    }
+
+    public List<String> getHelp() {
+        return help;
     }
 
     public void logInfoMessage(final String msg) {
@@ -836,6 +845,7 @@ public class EmberIsles extends JavaPlugin {
      */
     public static FileConfiguration config;
     private final Map<String, String> messages = new HashMap<>();
+    private final List<String> help = new ArrayList<>();
     private final Map<IslandProtectionAccessGroup, BitSet> defaultProtectionFlags = new HashMap<>();
     private String worldGenerator;
     private boolean worldEditIgnoreAirBlocks;
