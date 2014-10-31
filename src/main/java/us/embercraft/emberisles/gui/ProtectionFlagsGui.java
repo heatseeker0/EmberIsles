@@ -44,21 +44,20 @@ public class ProtectionFlagsGui extends AbstractGui {
                 return false;
             }
         }
-        @SuppressWarnings("hiding")
-        IslandProtectionFlag flag = null;
+        IslandProtectionFlag protectionFlag = null;
         if (config.contains("items." + itemKey + ".flag")) {
             try {
-                flag = IslandProtectionFlag.getEnum(config.getString("items." + itemKey + ".flag"));
+                protectionFlag = IslandProtectionFlag.getEnum(config.getString("items." + itemKey + ".flag"));
             } catch (IllegalArgumentException e) {
                 EmberIsles.getInstance().logErrorMessage(String.format("Wrong action in config.yml for key item.%s.flag. This menu entry won't be available to players until the error is corrected.", itemKey));
                 return false;
             }
         }
-        if (type != null && accessGroup != null && flag != null) {
+        if (type != null && accessGroup != null && protectionFlag != null) {
             Island island = EmberIsles.getInstance().getWorldManager().getPlayerIsland(type, player.getUniqueId());
             if (island != null) {
                 List<String> lore = ItemUtils.getItemLore(item);
-                if (island.getProtectionFlag(accessGroup, flag)) {
+                if (island.getProtectionFlag(accessGroup, protectionFlag)) {
                     lore.addAll(MessageUtils.parseColors(config.getStringList("allowed-lore")));
                 } else {
                     lore.addAll(MessageUtils.parseColors(config.getStringList("denied-lore")));
@@ -75,6 +74,7 @@ public class ProtectionFlagsGui extends AbstractGui {
                         break;
                 }
                 ItemUtils.setItemLore(item, lore);
+                flag.put(item, new Triplet<>(type, accessGroup, protectionFlag));
             }
         }
         return true;
@@ -87,6 +87,19 @@ public class ProtectionFlagsGui extends AbstractGui {
             return false;
         if (menuItem == null || menuItem.getType() == Material.AIR)
             return true;
+
+        if (flag.containsKey(menuItem)) {
+            Triplet<WorldType, IslandProtectionAccessGroup, IslandProtectionFlag> triplet = flag.get(menuItem);
+            Island island = EmberIsles.getInstance().getWorldManager().getPlayerIsland(triplet.getFirst(), player.getUniqueId());
+            if (island != null) {
+                EmberIsles.getInstance().getIslandCmdHandler().onCommand(player, null, null, new String[] { "flag", triplet.getFirst().getConfigKey(),
+                        triplet.getThird().getConfigKey(), triplet.getSecond().getConfigKey(),
+                        // Flip the flag the other way (true -> off, false -> on).
+                        island.getProtectionFlag(triplet.getSecond(), triplet.getThird()) ? "off" : "on" });
+                // Show the permissions again after the change
+                EmberIsles.getInstance().showPermissionsGui(player, triplet.getFirst());
+            }
+        }
 
         return true;
     }
